@@ -3,13 +3,13 @@ import sys
 import os
 
 ################################################################################
-# set up paths and dirs
-face_cascPath = "/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml"
-#eye_cascPath = "/usr/local/share/OpenCV/haarcascades/haarcascade_eye.xml"
+# set up casc paths and save-to dirs
+CWD = os.getcwd()
+face_cascPath = CWD+"/haarcascades/haarcascade_frontalface_alt.xml"
+#eye_cascPath = CWD+"/haarcascades/haarcascade_eye.xml"
 faceCascade = cv2.CascadeClassifier(face_cascPath)
 #eyeCascade = cv2.CascadeClassifier(eye_cascPath)
 
-CWD = os.getcwd()
 DETECTED_IMG_DIR = "/detected_faces_imgs"
 DETECTED_IMG_Path = CWD+DETECTED_IMG_DIR+"/img"
 try: 
@@ -25,14 +25,12 @@ try:
 except OSError:
     if not os.path.isdir(CWD+DETECTED_VD_DIR):
         raise
-vid_cnt = 0
-new_vid = True
+#vid_cnt = 0
+#new_vid = True
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 out = cv2.VideoWriter(DETECTED_VD_Path+".avi", fourcc, 20.0, (640,480))
 
 video_capture = cv2.VideoCapture(0)
-
-
 while True:
     # Capture frame-by-frame
     ret, frame = video_capture.read()
@@ -69,7 +67,7 @@ while True:
 	#new_vid = True
 	#out.release()
 	continue
-    else:
+    else: #save to the video file if faces are detected at this frame
 	#if new_vid:
 	#	out = cv2.VideoWriter(DETECTED_VD_Path+'/output.avi', fourcc, 20.0, (640,480))
 	#	new_vid = False
