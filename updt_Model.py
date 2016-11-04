@@ -13,6 +13,7 @@ face_cascPath = CWD+"/haarcascades/haarcascade_frontalface_alt.xml"
 #eye_cascPath = CWD+"/haarcascades/haarcascade_eye.xml"
 faceCascade = cv2.CascadeClassifier(face_cascPath)
 #eyeCascade = cv2.CascadeClassifier(eye_cascPath)
+MODEL_PATH = "./face_recognizer.xml"
 
 parser = argparse.ArgumentParser(description="\tNew user image capture and update model\n\n")
 parser.add_argument("user_label", help="\t\tindicate what number should be used to label the new related user", type=int)
@@ -84,7 +85,6 @@ def get_images_and_labels(path):
         image = np.array(image_pil, 'uint8')
         ## Get the label of the image
         nbr = int(os.path.split(path)[1].split(".")[0].replace("user", ""))
-      
     	images.append(image)
     	labels.append(nbr)
     	cv2.imshow("Adding faces to traning set...", image)
@@ -99,6 +99,6 @@ if(args.t):
     recognizer.train(images, np.array(labels))
 else:
     recognizer.update(images, np.array(labels))        
-recognizer.save("./face_recognizer.xml")
+recognizer.save(MODEL_PATH)
 
 

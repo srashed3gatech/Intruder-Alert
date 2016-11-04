@@ -8,20 +8,14 @@ import socket
 CWD = os.getcwd()
 face_cascPath = CWD+"/haarcascades/haarcascade_frontalface_alt.xml"
 faceCascade = cv2.CascadeClassifier(face_cascPath)
-DETECTED_IMG_DIR = CWD+"/detected_faces_imgs"
-DETECTED_IMG_Path = DETECTED_IMG_DIR+"/img"
 DETECTED_VD_DIR = CWD+"/detected_faces_videos"
 VID = 1 ## for now, vid is not changing
 DETECTED_VD_Path = DETECTED_VD_DIR+"/vid_"+str(VID)
+MODEL_PATH = "./face_recognizer.xml"
 SERVER_HOST = 'www.google.com'#'localhost'
 SERVER_PORT = 80
 
 ####  set up save-to dirs
-try: 
-    os.makedirs(DETECTED_IMG_DIR)
-except OSError:
-    if not os.path.isdir(DETECTED_IMG_DIR):
-        raise
 try: 
     os.makedirs(DETECTED_VD_DIR)
 except OSError:
@@ -31,8 +25,7 @@ except OSError:
 #### Set up the recognition model
 ## For face recognition we will the the LBPH Face Recognizer
 recognizer = cv2.createLBPHFaceRecognizer(1,8,8,8,100.0)
-recognizer.load("./face_recognizer.xml")
-cv2.destroyAllWindows()
+recognizer.load(MODEL_PATH)
         
 img_cnt = 0
 frm_cnt = 0
