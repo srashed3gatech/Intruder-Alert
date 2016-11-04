@@ -4,7 +4,7 @@ This is a intruder detection system developed for CS6400.
 
 Runtime Environment setup:
 
-1. Install OpenCV 2.4.13 (no versions above 2). Binds python to OpenCV.
+1. Install OpenCV 2.4.13 (no versions above 2). Bind python 2.7 to OpenCV.
 
 Client Socket Write: BUF[i] = 1#123123123123#USER#CONF
 
