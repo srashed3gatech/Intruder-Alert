@@ -6,6 +6,19 @@ Runtime Environment setup:
 
 1. Install OpenCV 2.4.13 (no versions above 2). Bind python 2.7 to OpenCV.
 
+
+
+
+To update/re-train face classifier:
+$ python updt_Model.py <user_label> 				-->> update model
+$ python updt_Model.py <user_label> --t 			-->> re-train model
+
+To launch image-capture&face-recognition module:
+$ python imgCap_RecgMod.py
+
+
+
+PROTOCOL
 Client Socket Write: BUF[i] = 1#123123123123#USER#CONF
 
 
