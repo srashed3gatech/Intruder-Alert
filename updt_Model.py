@@ -15,8 +15,8 @@ faceCascade = cv2.CascadeClassifier(face_cascPath)
 #eyeCascade = cv2.CascadeClassifier(eye_cascPath)
 MODEL_PATH = "./face_recognizer.xml"
 
-parser = argparse.ArgumentParser(description="\tNew user image capture and update model\n\n")
-parser.add_argument("user_label", help="\t\tindicate what number should be used to label the new related user", type=int)
+parser = argparse.ArgumentParser(description="\tNew user image capture and update model: First step is to capture your images via webcam, hit 'q' when you think you are done collecting images. Then the program will automatically train/update the model.\n\n")
+parser.add_argument("user_label", help="\t\tindicate what number should be used to label the new related user (the one appearing in front of the camera)", type=int)
 parser.add_argument("--t", help="\t\tindicate whether you want to retrain to a completely new model, if not specified, will update the model",action="store_true")
 args = parser.parse_args()
 user_label = args.user_label
@@ -68,8 +68,8 @@ cv2.destroyAllWindows()
 #### training the recognition model after new user image captures
 ## For face recognition we will the the LBPH Face Recognizer
 recognizer = cv2.createLBPHFaceRecognizer(1,8,8,8,123.0)
-if os.path.exists("./face_recognizer.xml"): 
-    recognizer.load("./face_recognizer.xml")
+if os.path.exists(MODEL_PATH): 
+    recognizer.load(MODEL_PATH)
 #### Training logic here, commented out so not retraining each time program runs
 def get_images_and_labels(path):
     ## Append all the absolute image paths in a list image_paths

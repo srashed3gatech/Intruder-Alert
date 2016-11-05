@@ -12,6 +12,8 @@ This is a intruder detection system developed for CS6400.
 `python updt_Model.py <user_label>` 				
 2. re-train model:
 `python updt_Model.py <user_label> --t` 			
+3. look at program description:
+`python updt_Model.py -h`
 
 ### To launch image-capture and face-recognition module:
 `python imgCap_RecgMod.py`
@@ -19,7 +21,7 @@ This is a intruder detection system developed for CS6400.
 
 
 ### NETWORKING PROTOCOL
-Client Socket Write: BUF[i] = VID\#FRAME_NUM\#TIME_STAMP\#USER\#CONF
+Client Socket Write: BUF[i] = \#VID\#FRAME_NUM\#TIME_STAMP\#USER\#CONF
 
 
 Server Socket

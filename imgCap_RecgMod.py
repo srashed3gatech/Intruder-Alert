@@ -12,8 +12,8 @@ DETECTED_VD_DIR = CWD+"/detected_faces_videos"
 VID = 1 ## for now, vid is not changing
 DETECTED_VD_Path = DETECTED_VD_DIR+"/vid_"+str(VID)
 MODEL_PATH = "./face_recognizer.xml"
-SERVER_HOST = 'www.google.com'#'localhost'
-SERVER_PORT = 80
+SERVER_HOST = 'localhost'
+SERVER_PORT = 5000
 
 ####  set up save-to dirs
 try: 
@@ -87,7 +87,7 @@ while True:
 	cur_time = time.time() ## get current UTC time
 	out.write(frame)	## write to video buffer
 	for msg in messages:
-	    msg = str(VID)+"#"+str(frm_cnt)+"#"+str(cur_time)+"#"+msg
+	    msg = "#"+str(VID)+"#"+str(frm_cnt)+"#"+str(cur_time)+"#"+msg
 	    print "Sending msg to server: "+msg
 	    try :
     	        s.sendall(msg)
