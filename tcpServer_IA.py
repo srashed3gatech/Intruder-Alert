@@ -1,9 +1,10 @@
 import socket
+from database_utility import iAlertDB
 
 def Main():
     host = '127.0.0.1'
     port = 5000
-
+    db_conn = iAlertDB();
     s = socket.socket()
     s.bind((host,port))
 
@@ -34,6 +35,7 @@ def Main():
                 write_to_db = d2_list[0].split('#')
                 for i in range(len(write_to_db)):
                     print write_to_db[i]
+                    db_conn.write_db_frame(write_to_db[i])
                 d2_list.pop(0)
                 print 'what is left in my list: ' + str(d2_list)
             data_count = data_count + 1
