@@ -1,17 +1,18 @@
-import MySQLdb
+from sqlalchemy import *
 
 
 class iAlertDB:
-    connection = None
+    engine = None
     
     def __init__(self):
         return;
         
     def connect_db(self):
-        if self.connection is not None:
-            return self.connection
-        self.connection = MySQLdb.connect("127.0.0.1","root","","ialert")
-        return self.connection
+        if self.engine is not None:
+            return self.engine
+        self.engine = create_engine("mysql://root@localhost/ialert")
+        self.engine.echo = True #to see what sql we are creating
+        return self.engine
     
     def write_db_frame(self,a):
         db = self.connect_db()

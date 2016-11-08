@@ -1,4 +1,5 @@
 import socket
+from VideoFrame import VideoFrame
 
 def Main():
     host = '127.0.0.1'
@@ -6,16 +7,16 @@ def Main():
 
     s = socket.socket()
     s.bind((host,port))
-
+    d2_list = []
+    call_back(10s, write_db_from_buffer(d2_list[], read_pointer, write_pointer))
+    write_pointer=100
+    read_pointer=0
     s.listen(3)
     data_count = 0
     while True:
         print "Waiting for connection"
         c, addr = s.accept()
         print "Connection from: " + str(addr)
-
-
-        d2_list = []
 
         while True:
             recv_len = 1024
@@ -28,9 +29,18 @@ def Main():
             if len(data) == recv_len:
                 print 'buffer overflow!!'
 
-            d2_list.append(data)
+            datagram = d2_list[0].split('#')
+            frame = VideoFrame()
+            frame.video_id = datagram[1]
+            frame.frame_num = datagram[2]
+            frame.timestamp = datagram[3]
+            frame.user_id = datagram[4]
+            frame.confid_level = datagram[5]
+    
+            d2_list[write_pointer % 100] = frame
+            write_pointer =  write_pointer-1 if write_pointer > 0 else 100
 
-            print 'process list: ' + str(d2_list)
+           ''' print 'process list: ' + str(d2_list)
 
             while d2_list:
                 write_to_db = d2_list[0].split('#')
@@ -54,7 +64,7 @@ def Main():
                             print 'write to DB conf_level'
                             print write_to_db[i]
                 d2_list.pop(0)
-                print 'what is left in my list: ' + str(d2_list)
+                print 'what is left in my list: ' + str(d2_list) '''
             data_count = data_count + 1
             print 'Finish the process of data# ' + str(data_count)
 
