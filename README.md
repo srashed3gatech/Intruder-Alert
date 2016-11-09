@@ -98,3 +98,16 @@ Setting up database:
 install xampp 5.5.28
 install mysql-workbench
 
+
+===================Message BUS=================
+Ref: https://pypi.python.org/pypi/nanoservice
+
+macOS :
+$ brew install nanoservice
+
+generic: (looks like its broken!! doesn't work after install)
+pip install nanoservice
+behind proxy: pip install --proxy user:password@proxyserver:port nanoservice
+
+Example:
+https://github.com/walkr/nanoservice/blob/master/examples/pub_sub
