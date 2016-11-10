@@ -31,53 +31,40 @@ countdown(10s, callback_function)
 
 
 
-BUFF_QUEUE
-
-
-synchronized
-funciton callback_function(){
-    //flush the buffer; 
-    
-    
-    //create db connction
-    server = ;';
-    port = '''
-    driver =/'/
-    
-    db = mysql_connect()
-    
-    foreach(item in BUFF_QUEUE){
-        itemArr = split(ite,. '$#'
-       db.insert("INSERT INTO FRAME VALUES
-        (itemARR[0], itemARR[1], itemARR[2], itemARR[3])"),
-        ()       
-    }
- 
-
-}
 
 ==========ISSUES TO SOLVE=========
-1. imgCap_RecgMod.py
-	- recognizing person isn't constant it continuously jump between recog or not recog and return spurious frames
-2. tcpServer_IA.py
-	- discontinue
-3. Camera Capture, Recognition & Training Module
-	3.1 Read user-id from related user and train the model with related user picture
-	3.2 Write video file id and path to video table which is saving current video
-	3.3 Make sure write new video file id in case we need to roll over to a new video file
-	3.4 Write frame on the message bus
-4. Message Bus
-	4.1 research item [mamun]
-5. DBController
-	5.1 Communicates with Message bus / grab available data and write frame into Database
-	5.2 Provide bunch of functions to use
-		5.2.1 write_from_message_bus()
-		5.2.2 write_new_video_file() - used by 3.2 / 3.3
-		5.2.3 read_related_user_info() - used by 3.1
-6. DBMiner
-	6.1 Research item
+We probably need not to use message bus. We'll use queue class - a builtin one which is synchronized. 
+But our program need to be multi-threaded with following functions:
+
+0. There is a global queue object that used for frame exchange between threads
+1. Master Thread
+	Functions -
+	1.1 Create and start camera Cap/Rec/Tra Thread
+	1.2 Create and start Db frame writer thread as a timeout manner  (e.g: threading.Timer(2, DBWriter, [params]))
+2. Camera Capture, Recognition & Training Thread
+	Functions - 
+	2.1 Read database user and picture info using function get_related_user_info() 
+	2.2 Train and generate face_recognizer.xml
+	2.3 Create a new video file and enter info into db
+	2.4 Enter into loop where it detect and recognize image and enqueue necessary frame (VideoFrame object) to threaded queue
+3. Database Frame writer Thread
+	Functions
+	3.1 dequeue MAX_WRITE_FRAME = 10 from global queue
+	3.2 Using sqlalchemy write frame into tables: frame, corresponds to (as applicable)
+
+TODO:
+~ Threaded queue creation
+~ Skeleton of Multithreaded program
+~ Database Writer thread creation
+~ Integrate current codes into skeleton
+~ 
+
+Research Item:
+~ How to create alarm from frames
+
 	
 ===== Prepare dev machine ======
+
 ::Setting UP the MAC ENV::
 
 1. Install Brew
@@ -88,26 +75,29 @@ funciton callback_function(){
 6. download git plugin for eclipse
 7. Pull git project 
 
-Python MYSQL COnnection:
+Python MYSQL Connection & Other modules:
 brew install mysql-connector-c
 pip install mysql-python
 
 pip install SQLAlchemy
+pip install PyDispatcher
 
 Setting up database:
 install xampp 5.5.28
 install mysql-workbench
 
 
-===================Message BUS=================
-Ref: https://pypi.python.org/pypi/nanoservice
+===================Message BUS Research=================
+Ref: http://pydispatcher.sourceforge.net/
 
-macOS :
-$ brew install nanoservice
+generic: 
+pip install PyDispatcher
+behind proxy: pip install --proxy user:password@proxyserver:port PyDispatcher
 
-generic: (looks like its broken!! doesn't work after install)
-pip install nanoservice
-behind proxy: pip install --proxy user:password@proxyserver:port nanoservice
+Example:http://bazaar.launchpad.net/~mcfletch/pydispatcher/working/files
 
-Example:
-https://github.com/walkr/nanoservice/blob/master/examples/pub_sub
+I've reserached other message Bus systems which is overly complicated (doesn't worth spending time)
+here is one of the reference: https://python-can.readthedocs.io/en/latest/interfaces/socketcan.html
+
+============Alarm Generation from Frame Research========
+??
