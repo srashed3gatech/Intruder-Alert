@@ -182,3 +182,13 @@ CREATE TABLE `SENT_TO` (
   CONSTRAINT `fk_sentto_alarmid` FOREIGN KEY (`alarm_id`) REFERENCES `ALARM` (`alarm_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_sentto_userid` FOREIGN KEY (`user_id`) REFERENCES `USER` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Creating View as it looks like corresponding classes
+--
+
+CREATE  OR REPLACE VIEW `recog_users` AS
+	SELECT * 
+	FROM RELATED_USER
+	JOIN RELATED_USER_PICTURE
+	USING (user_id);

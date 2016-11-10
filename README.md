@@ -79,8 +79,9 @@ Python MYSQL Connection & Other modules:
 brew install mysql-connector-c
 pip install mysql-python
 
-pip install SQLAlchemy
-pip install PyDispatcher
+Install database abstraction library: pip install SQLAlchemy
+Install database driver: pip install --proxy one.proxy.att.com:8080 pymysql 
+Install intra-thread message passing: pip install PyDispatcher
 
 Setting up database:
 install xampp 5.5.28

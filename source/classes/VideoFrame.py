@@ -1,11 +1,8 @@
 class VideoFrame:
-    video_id
-    frame_num
-    timestamp
-    user_id
-    confid_level
     
-    def __init__(self):
-        return;
-    
-    def __del__(self):
+    def __init__(self, videoId, frameNum, timestamp, userId, confidLevel):
+        self.video_id = videoId
+        self.frame_num = frameNum
+        self.timestamp = timestamp
+        self.user_id = userId
+        self.confid_level = confidLevel
