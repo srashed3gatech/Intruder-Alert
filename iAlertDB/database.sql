@@ -192,3 +192,13 @@ CREATE  OR REPLACE VIEW `recog_users` AS
 	FROM RELATED_USER
 	JOIN RELATED_USER_PICTURE
 	USING (user_id);
+	
+---
+--- Sample data
+---
+INSERT INTO `ialertdb`.`USER` (`user_id`, `name`) VALUES ('mamun', 'MAMUN');
+INSERT INTO `ialertdb`.`RELATED_USER` (`user_id`, `conf_level_thresh`) VALUES ('mamun', '10');
+INSERT INTO `ialertdb`.`RELATED_USER_PICTURE` (`user_id`, `pic_id`, `pic_path`) VALUES ('mamun', 0, '/root/');
+
+
+
