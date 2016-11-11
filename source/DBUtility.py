@@ -1,5 +1,6 @@
 from __future__ import print_function
 from sqlalchemy import *
+from datetime import datetime, timedelta
 from classes.RelatedUserInfo import RelatedUserInfo
 
 
@@ -8,7 +9,8 @@ from classes.RelatedUserInfo import RelatedUserInfo
 class iAlertDB:
     
     def __init__(self):
-        self.connection_url = "mysql+pymysql://root@localhost/ialertdb"
+        #self.connection_url = "mysql+pymysql://root@localhost/ialertdb"
+        self.connection_url = "mysql+pymysql://root@localhost:14924/ialertdb"
         self.engine = None
         
     def _connect_db(self):
@@ -32,6 +34,13 @@ class iAlertDB:
             relatedUsersList.append(relatedUserInfo)
         return relatedUsersList
     
+    def create_new_video_file(self, videoFile):
+        db = self._connect_db()
+        videoTable = Table('VIDEO', MetaData(db), autoload=True)
+        ins = videoTable.insert()
+        videoExpiry = datetime.now()+timedelta(hours=3) #video expire after 3 hours
+        res = ins.execute({'video_path': videoFile, 'duration_sec': -1, 'expiry': videoExpiry.strftime('%Y-%m-%d %H:%M:%S')})
+        return res.lastrowid
           
 #Test Cases: 
 if __name__ == "__main__":
