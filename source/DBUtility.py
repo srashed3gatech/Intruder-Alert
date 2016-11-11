@@ -34,13 +34,16 @@ class iAlertDB:
             relatedUsersList.append(relatedUserInfo)
         return relatedUsersList
     
-    def create_new_video_file(self, videoFile):
+    def create_new_video_file(self, videoFile): #returns a videoObj tuple
         db = self._connect_db()
         videoTable = Table('VIDEO', MetaData(db), autoload=True)
         ins = videoTable.insert()
         videoExpiry = datetime.now()+timedelta(hours=3) #video expire after 3 hours
         res = ins.execute({'video_path': videoFile, 'duration_sec': -1, 'expiry': videoExpiry.strftime('%Y-%m-%d %H:%M:%S')})
-        return res.lastrowid
+        return {'video_id': res.lastrowid,  
+                'video_path': videoFile, 
+                'duration_sec': -1, 
+                'expiry': videoExpiry.strftime('%Y-%m-%d %H:%M:%S')}
           
 #Test Cases: 
 if __name__ == "__main__":
