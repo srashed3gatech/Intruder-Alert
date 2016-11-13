@@ -11,4 +11,4 @@ class BootLoader():
         '''
         #if userList empty - then create a default face recognizer and send it 
         
-        return "./face_recognizer.xml"
+        return "../face_recognizer.xml"
