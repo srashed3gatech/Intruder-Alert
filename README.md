@@ -19,11 +19,11 @@ This is a intruder detection system developed for CS6400.
 
 
 
-### To update/re-train face classifier:
+### To update/re-train face classifier: **NOTE: use the updt_Model in source folder**
 1. update model:
-`python updt_Model.py <user_label>` 				
+`python updt_Model.py <user_label> <user_name>` 				
 2. re-train model:
-`python updt_Model.py <user_label> --t` 			
+`python updt_Model.py <user_label> <user_name> --t` 			
 3. look at program description:
 `python updt_Model.py -h`
 
