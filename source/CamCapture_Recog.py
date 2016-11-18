@@ -9,6 +9,7 @@ import Queue
         - write video file for recording purpose'''
 
 class CameraCaptureNRecognition:
+    CONF_THRSH = 100
     def __init__(self, videoObj, frameQueue, qLock, 
                  face_cascade_path, model_path):
         self.videoObj = videoObj
@@ -31,7 +32,7 @@ class CameraCaptureNRecognition:
         faceCascade = cv2.CascadeClassifier(self.face_cascPath)
         #### Set up the recognition model
         ## For face recognition we will the the LBPH Face Recognizer
-        recognizer = cv2.createLBPHFaceRecognizer(1,8,8,8,100.0)
+        recognizer = cv2.createLBPHFaceRecognizer(1,8,8,8,self.CONF_THRSH)
         self.logger.info("Openning Face cascade - "+self.model_path)
         recognizer.load(self.model_path)
                 
@@ -59,7 +60,7 @@ class CameraCaptureNRecognition:
             for (x, y, w, h) in faces:
                 roi = gray[y:y+h,x:x+w] # a face region in current frame
                 nbr_predicted, conf = recognizer.predict(roi)
-                
+                print "predicted: "+str(nbr_predicted)+" conf: "+str(conf)
                 vidFrame = VideoFrame(videoFileId, frm_cnt, 
                                       frameTime, nbr_predicted, conf);
                 
@@ -87,14 +88,12 @@ class CameraCaptureNRecognition:
 
 if __name__ == "__main__":
     CWD = os.getcwd()
-    face_cascPath = CWD+"/../haarcascades/haarcascade_frontalface_alt.xml"
+    face_cascPath = "../haarcascades/haarcascade_frontalface_alt.xml"
     faceCascade = cv2.CascadeClassifier(face_cascPath)
-    DETECTED_VD_DIR = CWD+"/../Video"
+    DETECTED_VD_DIR = "../Video"
     VID = time.time() ## for now, vid is not changing
     DETECTED_VD_Path = DETECTED_VD_DIR+"/vid_"+str(VID)
     MODEL_PATH = "../face_recognizer.xml"
-    SERVER_HOST = 'google.com'#'localhost'
-    SERVER_PORT = 80#5000
     
     videoObj = {"video_id": 1,  
                 "video_path": DETECTED_VD_Path, 

@@ -7,11 +7,9 @@ import logging
     - read all related users from DBUtitity.get_realted_users
     - train and generate face_recognizer.xml at startup
    NOTICE: 
-    - Currently each user only has one pic path that contains all the pics, MAY NEED TO CHANGE DB
     '''
 class BootLoader():
     
-    CONF_THRSH = 123
     MODEL_PATH = "../face_recognizer.xml"
     
     def __init__(self, userListTrain):
@@ -51,7 +49,7 @@ class BootLoader():
         if not self.userList:
             pass
         else:
-            recognizer = cv2.createLBPHFaceRecognizer(1,8,8,8,self.CONF_THRSH)
+            recognizer = cv2.createLBPHFaceRecognizer()
             images = []
             labels = []
             for u in self.userList:

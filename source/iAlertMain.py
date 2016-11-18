@@ -16,7 +16,7 @@ import logging
     
     NEXT...TODO
     4. start alarm generator thread
-    *****Deal with confidence thresholds of each user, RELATED_USER_PICTURE 1-1 mapping to RELATED_USER*****
+    *****Deal with confidence thresholds of each user: cannot have diff threshold for each user unless split to diff xml*****
 '''
 
 MAX_QUEUE_SIZE = 10000
@@ -76,3 +76,4 @@ if __name__ == "__main__":
     
     for t in workerThreads:
         t.join()
+
