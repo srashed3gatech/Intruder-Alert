@@ -16,6 +16,7 @@ import logging
     
     NEXT...TODO
     4. start alarm generator thread
+    *****Deal with confidence thresholds of each user, RELATED_USER_PICTURE 1-1 mapping to RELATED_USER*****
 '''
 
 MAX_QUEUE_SIZE = 10000
@@ -43,8 +44,14 @@ if __name__ == "__main__":
     db = iAlertDB()
     logger.info("Starting bootloader ...")
     bootLoader = BootLoader(db.get_realted_users())
-    faceRecogXmlFilePath = bootLoader.trainModel();
+    faceRecogXmlFilePath = bootLoader.trainModel()
     
+    #create the folder of Video is not existed
+    try: 
+        os.makedirs("../Video/")
+    except OSError:
+        if not os.path.isdir("../Video/"):
+            raise
     #create a video file - name as current timestamp
     currentVideoRecFile = "../Video/cam_cap_"+time.strftime("%Y%m%d-%H%M%S")+".avi"
     videoObject = db.create_new_video_file(currentVideoRecFile)
