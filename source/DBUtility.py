@@ -22,6 +22,18 @@ class iAlertDB:
         self.engine.echo = True #to see what sql we are creating
         return self.engine
     
+    def insert_related_user(self,user):
+        db = self._connect_db()
+        user_table = Table('USER', MetaData(db), autoload=True)
+        insUser = user_table.insert()
+        res = insUser.execute({'user_id': user.user_id, 'name' : user.name})
+        related_user_table = Table('RELATED_USER', MetaData(db), autoload=True)
+        insReUser = related_user_table.insert()
+        res = insReUser.execute({'user_id': user.user_id, 'conf_level_thresh':user.conf_level_thresh})
+        related_user_pic = Table('RELATED_USER_PICTURE', MetaData(db), autoload=True)
+        insReUserPic = related_user_pic.insert()
+        res = insReUserPic.execute({'user_id': user.user_id,'pic_id': user.pic_id, 'pic_path': user.pic_path})
+    
     def get_realted_users(self):
         '''return array of object RelatedUser existing in db'''
         relatedUsersList = []
@@ -75,6 +87,8 @@ class iAlertDB:
 #Test Cases: 
 if __name__ == "__main__":
     obj = iAlertDB()
+    u = RelatedUserInfo(1,1,"test",100)
+    obj.insert_related_user(u)
     userList = obj.get_realted_users()
     print(userList)
 

@@ -58,6 +58,7 @@ class BootLoader():
                 imgs, lbls = self._get_images_and_labels(u.pic_path)
                 images = images + imgs
                 labels = labels + lbls
+            cv2.destroyAllWindows()
             recognizer.train(images, np.array(labels))
             recognizer.save(self.MODEL_PATH)
             print("Trained from Related_users and Saved model")
