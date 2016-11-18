@@ -11,17 +11,19 @@ from classes.RelatedUserInfo import RelatedUserInfo
 ################################################################################
 #### set up casc paths and save-to dirs
 CWD = os.getcwd()
-face_cascPath = CWD+"../haarcascades/haarcascade_frontalface_alt.xml"
+face_cascPath = "../haarcascades/haarcascade_frontalface_alt.xml"
 #eye_cascPath = CWD+"/haarcascades/haarcascade_eye.xml"
 faceCascade = cv2.CascadeClassifier(face_cascPath)
 #eyeCascade = cv2.CascadeClassifier(eye_cascPath)
-MODEL_PATH = CWD+"../face_recognizer.xml"
+MODEL_PATH = "../face_recognizer.xml"
 
 parser = argparse.ArgumentParser(description="\tNew user image capture and update model: First step is to capture your images via webcam, hit 'q' when you think you are done collecting images. Then the program will automatically train/update the model.\n\n")
 parser.add_argument("user_label", help="\t\tindicate what number should be used to label the new related user (the one appearing in front of the camera)", type=int)
+parser.add_argument("name", help="\t\tindicate the new user's name",type=str)
 parser.add_argument("--t", help="\t\tindicate whether you want to retrain to a completely new model, if not specified, will update the model",action="store_true")
 args = parser.parse_args()
 user_label = args.user_label
+user_name = args.name
 DETECTED_IMG_DIR = CWD+"/../detected_faces_imgs/user"+str(user_label)
 DETECTED_IMG_Path = DETECTED_IMG_DIR+"/img_"
 
@@ -73,6 +75,7 @@ TODO: get User name and conf_thresh? now 100 is the default conf thresh
 '''
 db = iAlertDB()
 u = RelatedUserInfo(user_label,user_label,DETECTED_IMG_DIR,100)
+u.name = user_name
 db.insert_related_user(u)
 
 #### training the recognition model after new user image captures
