@@ -1,3 +1,15 @@
+###########TODO: FINAL INTEGRATION MEETING 11/20/2016##############
+Before the Call:
+- Kixin done with alarm-generation / alarm-clear part - and let Mamun know it's ready for integration (by Saturday afternoon 5pm)
+- Yaling completed bootloader (create face_recognizer.xml), update_mode (get user picture and enter related_user entry into db) -(By Saturday afternoon 5pm)
+- Mamun integated bootloader into iAlertMain and frame, corresponds_to table updated properly (by Sunday Morning 9am)
+
+To Do on Call:
+1. Full end to end integration testing - i.e. all codes are functioning correctly
+2. Demo Use Case testing
+###################################################################
+
+
 # Intruder-Alert
 This is a intruder detection system developed for CS6400.
 
