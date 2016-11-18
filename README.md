@@ -101,4 +101,15 @@ I've reserached other message Bus systems which is overly complicated (doesn't w
 here is one of the reference: https://python-can.readthedocs.io/en/latest/interfaces/socketcan.html
 
 ============Alarm Generation from Frame Research========
-??
+=== alarm creation/tallying process ====
+1. Do I see any Stranger Frame? 
+	Y -> check if any INTRUDER ALARM (cate_name) exist and Clear_Time = null
+		Y -> tally++ , update last_occ = current timestamp
+        N -> INSERT INTO ALARM (... first_occ=timestamp, last_occ=timestamp 'INTRUDER ALARM', tally = 0, clear_time = null)
+2. Do I see any Stranger Frame? Y - follow ste-1
+	N - do nothing
+
+== alarm clearing process ===
+alarm clearing threshold = 10min
+every 10 min:
+	UPDATE ALARM set clear_time = now where time_now - last_occ > 10min

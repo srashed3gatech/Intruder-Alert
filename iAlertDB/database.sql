@@ -214,3 +214,10 @@ AND (f.video_id, f.frame_num) NOT IN (
 	CORRESPONDS_TO c ON (ff.video_id=c.video_id AND ff.frame_num = c.frame_num)
 	where ff.timestamp > '2016-11-17 19:54:16'
 )
+
+---
+--- Alarm last occurrane column needed
+---
+
+ALTER TABLE `ialertdb`.`ALARM` 
+ADD COLUMN `last_occ` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `first_occ`;
