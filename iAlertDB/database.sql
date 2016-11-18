@@ -201,4 +201,16 @@ INSERT INTO `ialertdb`.`RELATED_USER` (`user_id`, `conf_level_thresh`) VALUES ('
 INSERT INTO `ialertdb`.`RELATED_USER_PICTURE` (`user_id`, `pic_id`, `pic_path`) VALUES ('mamun', 0, '/root/');
 
 
-
+---
+--- get stranger frames
+---
+SELECT * 
+FROM frame f
+where f.timestamp > '2016-11-17 19:54:16'
+AND (f.video_id, f.frame_num) NOT IN (
+	SELECT ff.video_id, ff.frame_num
+	FROM frame ff
+	JOIN 
+	CORRESPONDS_TO c ON (ff.video_id=c.video_id AND ff.frame_num = c.frame_num)
+	where ff.timestamp > '2016-11-17 19:54:16'
+)
