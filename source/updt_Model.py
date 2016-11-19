@@ -24,7 +24,7 @@ parser.add_argument("--t", help="\t\tindicate whether you want to retrain to a c
 args = parser.parse_args()
 user_label = args.user_label
 user_name = args.name
-DETECTED_IMG_DIR = CWD+"/../detected_faces_imgs/user"+str(user_label)
+DETECTED_IMG_DIR = "../detected_faces_imgs/user"+str(user_label)
 DETECTED_IMG_Path = DETECTED_IMG_DIR+"/img_"
 
 ## remove all previous images in that user's dir
