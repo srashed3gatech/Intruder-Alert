@@ -72,7 +72,7 @@ if __name__ == "__main__":
     while not frameExchangeQueue.empty():
         pass
     #camera capture closed, now signal for dbwriter close and close the program
-    stopDBWriterThreadFlag = True
+    dbWriterThread.exitThreadFlag = True
     
     for t in workerThreads:
         t.join()
