@@ -3,6 +3,7 @@ from sqlalchemy import *
 from datetime import datetime, timedelta
 from classes.RelatedUserInfo import RelatedUserInfo
 from classes.VideoFrame import VideoFrame
+from classes.VideoFile import VideoFile
 
 
 ''' iAlertDB is all db related functionality provider '''
@@ -52,7 +53,7 @@ class iAlertDB:
         videoTable = Table('VIDEO', MetaData(db), autoload=True)
         ins = videoTable.insert()
         videoExpiry = datetime.now()+timedelta(hours=3) #video expire after 3 hours
-        res = ins.execute({'video_path': videoFile, 'duration_sec': -1, 'expiry': videoExpiry.strftime('%Y-%m-%d %H:%M:%S')})
+        res = ins.execute({'video_path': videoFile, 'duration_sec': -1, 'framerate': 20, 'expiry': videoExpiry.strftime('%Y-%m-%d %H:%M:%S')})
         return {"video_id": res.lastrowid,  
                 "video_path": videoFile, 
                 "duration_sec": -1, 
@@ -84,11 +85,26 @@ class iAlertDB:
             corresponds_toTable = Table('CORRESPONDS_TO', MetaData(db), autoload=True)
             instCT = corresponds_toTable.insert()
             instCT.execute(corrspToArr)
+    
+    def get_video_file(self, video_id): #returns a videoObj tuple
+        db = self._connect_db()
+        videoTable = Table('VIDEO', MetaData(db), autoload=True)
+        sel = videoTable.select(videoTable.c.video_id == video_id)
+        res = sel.execute();
+        for row in res: #just single record in case we have something with given id
+            videoFileObj = VideoFile(row[videoTable.c.video_id], row[videoTable.c.time_created],
+                                 row[videoTable.c.duration_sec], row[videoTable.c.video_path],
+                                 row[videoTable.c.framerate], row[videoTable.c.expiry])
+        return videoFileObj
+    
+    
 #Test Cases: 
 if __name__ == "__main__":
     obj = iAlertDB()
-    u = RelatedUserInfo(1,1,"test",100)
+    '''u = RelatedUserInfo(1,1,"test",100)
     obj.insert_related_user(u)
     userList = obj.get_realted_users()
-    print(userList)
+    print(userList)'''
+    videoFileObj = obj.get_video_file(101)
+    print(videoFileObj)
 
