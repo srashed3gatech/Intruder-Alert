@@ -192,14 +192,26 @@ CREATE  OR REPLACE VIEW `recog_users` AS
 	FROM RELATED_USER
 	JOIN RELATED_USER_PICTURE
 	USING (user_id);
-	
----
---- Sample data
----
-INSERT INTO `ialertdb`.`USER` (`user_id`, `name`) VALUES ('mamun', 'MAMUN');
-INSERT INTO `ialertdb`.`RELATED_USER` (`user_id`, `conf_level_thresh`) VALUES ('mamun', '10');
-INSERT INTO `ialertdb`.`RELATED_USER_PICTURE` (`user_id`, `pic_id`, `pic_path`) VALUES ('mamun', 0, '/root/');
 
+---
+--- Alarm last occurrane column needed
+---
+
+ALTER TABLE `ialertdb`.`ALARM` 
+ADD COLUMN `last_occ` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `first_occ`;
+
+
+---
+--- Delete all data - flush
+---
+DELETE FROM CORRESPONDS_TO;
+DELETE FROM FRAME;
+DELETE FROM VIDEO;
+DELETE FROM RELATED_USER_PICTURE;
+DELETE FROM RELATED_USER;
+DELETE FROM USER;
+
+	
 
 ---
 --- get stranger frames
@@ -215,9 +227,3 @@ AND (f.video_id, f.frame_num) NOT IN (
 	where ff.timestamp > '2016-11-17 19:54:16'
 )
 
----
---- Alarm last occurrane column needed
----
-
-ALTER TABLE `ialertdb`.`ALARM` 
-ADD COLUMN `last_occ` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `first_occ`;
