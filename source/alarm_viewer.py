@@ -23,7 +23,7 @@ def writeTempVideo(video_src_file, alarm_frames):
     cap.release()
     
 def emailIAlert(video_src_file, emailAddress):
-    fromaddr = "srashed3gatech@gmail.com"
+    fromaddr = "XXXXX"
     toaddr = emailAddress
     
     msg = MIMEMultipart()
@@ -48,7 +48,7 @@ def emailIAlert(video_src_file, emailAddress):
     
     server = smtplib.SMTP('smtp.gmail.com',587)
     server.starttls()
-    server.login(fromaddr, '2003260028')
+    server.login(fromaddr, 'XXXXXX')
     text = msg.as_string()
     server.sendmail(fromaddr, toaddr, text)
     server.quit()
