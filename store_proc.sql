@@ -1,4 +1,3 @@
-
 DELIMITER //
 DROP PROCEDURE IF EXISTS generate_alarm
 //
@@ -15,7 +14,11 @@ DECLARE ALARMED_FRAME_MAX_TIMESTAMP TIMESTAMP;
 DECLARE ALARM_ID INT(11);
 DECLARE TALLY_COUNT INT(11);
 DECLARE last_alarm_id INT(11);
-
+DECLARE exit handler for SQLEXCEPTION
+        BEGIN
+        ROLLBACK;
+		RESIGNAL;
+    END;
 /*Timestamp after which we need to read frame*/
 (SELECT str_to_date(s.value,'%Y-%m-%d %k:%i:%s') INTO LAST_RUN_TIME
 						FROM SYSTEM_INFO s
@@ -43,9 +46,9 @@ IF (ALARMED_FRAME_COUNT > 0 AND ALARMED_FRAME_MIN_TIMESTAMP is not NULL) THEN
 	/*get if same alarm exist and not cleared*/
 	
 
-	SELECT alarm_id tally INTO ALARM_ID, TALLY_COUNT 
+	SELECT alarm_id, tally INTO ALARM_ID, TALLY_COUNT 
 		FROM ALARM 
-		WHERE cate_name = alarm_category AND clear_time IS NOT NULL;
+		WHERE cate_name = alarm_category AND clear_time IS NOT NULL LIMIT 1;
 	
 
 	START TRANSACTION;
@@ -61,13 +64,13 @@ IF (ALARMED_FRAME_COUNT > 0 AND ALARMED_FRAME_MIN_TIMESTAMP is not NULL) THEN
 		INSERT INTO GENERATED_FROM(video_id, frame_num, alarm_id)
 			SELECT f.video_id, f.frame_num, last_alarm_id
 			FROM frame f
-			where f.timestamp > dateLastRun
+			where f.timestamp > LAST_RUN_TIME
 			AND (f.video_id, f.frame_num) NOT IN (
 				SELECT ff.video_id, ff.frame_num
 				FROM frame ff
 				JOIN 
 				CORRESPONDS_TO c ON (ff.video_id=c.video_id AND ff.frame_num = c.frame_num)
-				where ff.timestamp > dateLastRun
+				where ff.timestamp > LAST_RUN_TIME
 			);
 	ELSE
 		UPDATE ALARM SET tally = tally + 1 WHERE alarm_id = ALARM_ID;
