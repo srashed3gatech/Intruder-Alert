@@ -214,21 +214,6 @@ DELETE FROM USER;
 	
 
 ---
---- get stranger frames
----
-SELECT * 
-FROM frame f
-where f.timestamp > '2016-11-17 19:54:16'
-AND (f.video_id, f.frame_num) NOT IN (
-	SELECT ff.video_id, ff.frame_num
-	FROM frame ff
-	JOIN 
-	CORRESPONDS_TO c ON (ff.video_id=c.video_id AND ff.frame_num = c.frame_num)
-	where ff.timestamp > '2016-11-17 19:54:16'
-)
-
-
----
 --- Alarm Gnerator - to be called from DB_Frame_Writer.run()
 ---
 
@@ -318,5 +303,33 @@ END IF;
 END
 //DELIMITER ;
 
-
-
+---
+--- Unprocessed open alarm view
+---
+CREATE 
+    ALGORITHM = UNDEFINED 
+    DEFINER = `root`@`%` 
+    SQL SECURITY DEFINER
+VIEW `unprocessed_open_alarm` AS
+    select 
+        `a`.`alarm_id` AS `alarm_id`,
+        `a`.`cate_name` AS `cate_name`,
+        `a`.`first_occ` AS `first_occ`,
+        `a`.`last_occ` AS `last_occ`,
+        `a`.`tally` AS `tally`,
+        `a`.`clear_time` AS `clear_time`,
+        `g`.`video_id` AS `video_id`,
+        `v`.`video_path` AS `video_path`,
+        `g`.`frame_num` AS `frame_num`,
+        `s`.`user_id` AS `user_id`,
+        `s`.`status` AS `status`
+    from
+        ((`ALARM` `a`
+        left join `SENT_TO` `s` ON (((`s`.`alarm_id` = `a`.`alarm_id`)
+            and (`s`.`status` = 0))))
+        join (`GENERATED_FROM` `g`
+        join `VIDEO` `v` ON ((`v`.`video_id` = `g`.`video_id`))))
+    where
+        ((`a`.`alarm_id` = `g`.`alarm_id`)
+            and isnull(`a`.`clear_time`))
+    order by `a`.`alarm_id`
