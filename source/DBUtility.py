@@ -97,6 +97,8 @@ class iAlertDB:
                                  row[videoTable.c.framerate], row[videoTable.c.expiry])
         return videoFileObj
     
+    def get_unprocesses_alarm_frames(self): #send alarms that not been sent and not cleared
+        #this should be a view
     
 #Test Cases: 
 if __name__ == "__main__":
