@@ -306,12 +306,8 @@ END
 ---
 --- Unprocessed open alarm view
 ---
-CREATE 
-    ALGORITHM = UNDEFINED 
-    DEFINER = `root`@`%` 
-    SQL SECURITY DEFINER
-VIEW `unprocessed_open_alarm` AS
-    select 
+CREATE VIEW `unprocessed_open_alarm` AS
+select 
         `a`.`alarm_id` AS `alarm_id`,
         `a`.`cate_name` AS `cate_name`,
         `a`.`first_occ` AS `first_occ`,
@@ -332,4 +328,4 @@ VIEW `unprocessed_open_alarm` AS
     where
         ((`a`.`alarm_id` = `g`.`alarm_id`)
             and isnull(`a`.`clear_time`))
-    order by `a`.`alarm_id`
+    order by `a`.`alarm_id`, `g`.`frame_num`

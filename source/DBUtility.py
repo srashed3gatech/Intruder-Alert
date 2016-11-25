@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from classes.RelatedUserInfo import RelatedUserInfo
 from classes.VideoFrame import VideoFrame
 from classes.VideoFile import VideoFile
+from classes.AlarmFrame import AlarmFrame
 
 
 ''' iAlertDB is all db related functionality provider '''
@@ -20,7 +21,7 @@ class iAlertDB:
         if self.engine is not None:
             return self.engine
         self.engine = create_engine(self.connection_url)
-        self.engine.echo = True #to see what sql we are creating
+        self.engine.echo = False #to see what sql we are creating
         return self.engine
     
     def insert_related_user(self,user):
@@ -97,8 +98,64 @@ class iAlertDB:
                                  row[videoTable.c.framerate], row[videoTable.c.expiry])
         return videoFileObj
     
-    def get_unprocesses_alarm_frames(self): #send alarms that not been sent and not cleared
+    def get_unprocessed_alarm_frames(self): #send alarms that not been sent and not cleared
         #this should be a view
+        db = self._connect_db()
+        openAlarmTable = Table('unprocessed_open_alarm', MetaData(db), autoload=True)
+        uniqueAlarmIdsSel = select([distinct(openAlarmTable.c.alarm_id)])
+        retAlarmFrameArr = []
+        for alarmId in uniqueAlarmIdsSel.execute():
+            selAllAlarmFrameAttr = select([openAlarmTable.c.alarm_id, openAlarmTable.c.cate_name,
+                 openAlarmTable.c.first_occ, openAlarmTable.c.last_occ, 
+                 openAlarmTable.c.tally, openAlarmTable.c.clear_time,
+                 openAlarmTable.c.video_id, openAlarmTable.c.video_path], openAlarmTable.c.alarm_id == alarmId[openAlarmTable.c.alarm_id]).limit(1)
+            results = selAllAlarmFrameAttr.execute()
+            if results.rowcount == 0:
+                continue
+            for result in results:
+                alarmFrameObj = AlarmFrame(result[openAlarmTable.c.alarm_id],
+                                       result[openAlarmTable.c.cate_name], 
+                                       result[openAlarmTable.c.first_occ],
+                                       result[openAlarmTable.c.last_occ],
+                                       result[openAlarmTable.c.tally],
+                                       result[openAlarmTable.c.clear_time],
+                                       result[openAlarmTable.c.video_id],
+                                       result[openAlarmTable.c.video_path], 
+                                       [])
+                
+                selAlarmFrames = select([openAlarmTable.c.frame_num], openAlarmTable.c.alarm_id == alarmId[openAlarmTable.c.alarm_id])
+                resultFrames = selAlarmFrames.execute()
+                for frame in resultFrames:
+                    alarmFrameObj.frame_num.append(frame[openAlarmTable.c.frame_num])
+                
+                retAlarmFrameArr.append(alarmFrameObj)
+        
+        return retAlarmFrameArr
+    
+    def getAlarmReceipients(self):
+        #send userid and email from SYSTEM_USER table
+        db = self._connect_db()
+        user_table = Table('SYSTEM_USER', MetaData(db), autoload=True)
+        stmt = user_table.select()
+        rs = stmt.execute()
+        receipients = []
+        for row in rs:
+            receipients.append((row[user_table.c.user_id], row[user_table.c.email]))
+        
+        return receipients
+        
+    def setAlarmProcessed(self, alarmReceipients, alarmId):
+        #write SENT_TO table as 1 for alarm and receipients userid) 
+        db = self._connect_db()
+        sendToTable = Table('SENT_TO', MetaData(db), autoload=True)
+        sendToDictArr = []
+        for (user_id, email) in alarmReceipients:
+            sendToDictArr.append({"user_id": user_id,
+                                  "alarm_id": alarmId,
+                                  "status": 1})
+        insSendTo = sendToTable.insert()
+        insSendTo.execute(sendToDictArr); 
+    
     
 #Test Cases: 
 if __name__ == "__main__":
@@ -107,6 +164,7 @@ if __name__ == "__main__":
     obj.insert_related_user(u)
     userList = obj.get_realted_users()
     print(userList)'''
-    videoFileObj = obj.get_video_file(101)
-    print(videoFileObj)
+    '''videoFileObj = obj.get_video_file(101)
+    print(videoFileObj)'''
+    obj.get_unprocessed_alarm_frames()
 

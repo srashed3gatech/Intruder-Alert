@@ -4,7 +4,7 @@ class AlarmFrame:
                  first_occ, last_occ, tally, clear_time,
                  videoId, videoFile, frameNum):
         self.alarmid = alarmid
-        self.alarm_cateogry = alarm_category
+        self.alarm_category = alarm_category
         self.first_occ = first_occ
         self.last_occ = last_occ
         self.tally = tally
@@ -14,4 +14,4 @@ class AlarmFrame:
         self.frame_num = frameNum #this is a list of frames
         
     def __repr__(self):
-        return "<AlarmFrame(alarmid: %s, alarm_category: %s, first_occ: %s, last_occ: %s, tally: %s, clear_time: %s, video_id: %s, video_file: %s, frameNum: %s)>" % (self.alarmid, self.alarm_category, self.first_occ, self.last_occ, self.tally, self.clear_time, self.video_id, self.video_file, self.frameNum)
+        return "<AlarmFrame(alarmid: %s, alarm_category: %s, first_occ: %s, last_occ: %s, tally: %s, clear_time: %s, video_id: %s, video_file: %s, frameNum: %s)>" % (self.alarmid, self.alarm_category, self.first_occ, self.last_occ, self.tally, self.clear_time, self.video_id, self.video_file, self.frame_num)
