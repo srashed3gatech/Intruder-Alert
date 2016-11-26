@@ -287,7 +287,7 @@ IF (ALARMED_FRAME_COUNT > 0 AND ALARMED_FRAME_MIN_TIMESTAMP is not NULL) THEN
 	/*INSERT INTO sp_log(log_msg) values(concat("ALARM_ID: ",ALARM_ID, "TALLY_COUNT: ", TALLY_COUNT));*/
 	
 	IF (ALARM_ID IS NULL) OR ( (ALARM_ID >= 0) AND (TALLY_COUNT >= tally_threshold) ) THEN
-		INSERT INTO sp_log(log_msg) values(concat("Debug: in IF => ALARM_ID: ", ALARM_ID, " TALLY_COUNT: ", TALLY_COUNT, "\n"));
+		/*INSERT INTO sp_log(log_msg) values(concat("Debug: in IF => ALARM_ID: ", ALARM_ID, " TALLY_COUNT: ", TALLY_COUNT, "\n"));*/
 		/*insert alarm table entry*/
 		INSERT INTO ALARM(first_occ, last_occ, tally, cate_name) 
 			VALUES(ALARMED_FRAME_MIN_TIMESTAMP, ALARMED_FRAME_MAX_TIMESTAMP, 0, alarm_category);
