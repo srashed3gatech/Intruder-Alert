@@ -205,12 +205,18 @@ ADD COLUMN `last_occ` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `first_o
 --- Delete all data - flush
 ---
 DELETE FROM CORRESPONDS_TO;
+DELETE FROM GENERATED_FROM;
+DELETE FROM SENT_TO;
 DELETE FROM FRAME;
 DELETE FROM VIDEO;
+DELETE FROM ALARM;
+
+
 DELETE FROM RELATED_USER_PICTURE;
 DELETE FROM RELATED_USER;
+DELETE FROM SYSTEM_USER;
 DELETE FROM USER;
-
+DELETE FROM SYSTEM_INFO;
 	
 
 ---
@@ -238,6 +244,8 @@ DECLARE exit handler for SQLEXCEPTION
         ROLLBACK;
 		RESIGNAL;
     END;
+/*TRUNCATE sp_log;
+INSERT INTO sp_log(log_msg) values(concat("Debug: Begin attributes alarm_category: ", alarm_category, " tally_threshold: ", tally_threshold, "\n"));*/
 /*Timestamp after which we need to read frame*/
 (SELECT str_to_date(s.value,'%Y-%m-%d %k:%i:%s') INTO LAST_RUN_TIME
 						FROM SYSTEM_INFO s
@@ -261,18 +269,25 @@ SELECT count(f.frame_num), min(f.timestamp), max(f.timestamp)
 		where ff.timestamp > LAST_RUN_TIME
 	) LIMIT 1;
 
+/*INSERT INTO sp_log(log_msg) values(concat("Debug: Starting Transaction Before IF"));*/
+START TRANSACTION;
 IF (ALARMED_FRAME_COUNT > 0 AND ALARMED_FRAME_MIN_TIMESTAMP is not NULL) THEN
 	/*get if same alarm exist and not cleared*/
-	
+	/*INSERT INTO sp_log(log_msg) values(concat("Debug: in IF => ALARMED_FRAME_MIN_TIMESTAMP: ", ALARMED_FRAME_MIN_TIMESTAMP, " ALARMED_FRAME_COUNT: ", ALARMED_FRAME_COUNT, "\n"));*/
 
-	SELECT alarm_id, tally INTO ALARM_ID, TALLY_COUNT 
-		FROM ALARM 
-		WHERE cate_name = alarm_category AND clear_time IS NOT NULL LIMIT 1;
-	
+	SELECT a.alarm_id, a.tally INTO ALARM_ID, TALLY_COUNT
+		FROM ALARM a
+		WHERE a.cate_name = alarm_category 
+		AND a.clear_time IS NULL 
+		order by a.alarm_id desc
+		LIMIT 1;
 
-	START TRANSACTION;
+	/*SELECT ALARM_ID, TALLY_COUNT;*/
+
+	/*INSERT INTO sp_log(log_msg) values(concat("ALARM_ID: ",ALARM_ID, "TALLY_COUNT: ", TALLY_COUNT));*/
 	
-	IF (ALARM_ID IS NOT NULL AND TALLY_COUNT+1 > tally_threshold) OR (ALARM_ID IS NULL) THEN
+	IF (ALARM_ID IS NULL) OR ( (ALARM_ID >= 0) AND (TALLY_COUNT >= tally_threshold) ) THEN
+		INSERT INTO sp_log(log_msg) values(concat("Debug: in IF => ALARM_ID: ", ALARM_ID, " TALLY_COUNT: ", TALLY_COUNT, "\n"));
 		/*insert alarm table entry*/
 		INSERT INTO ALARM(first_occ, last_occ, tally, cate_name) 
 			VALUES(ALARMED_FRAME_MIN_TIMESTAMP, ALARMED_FRAME_MAX_TIMESTAMP, 0, alarm_category);
@@ -292,11 +307,24 @@ IF (ALARMED_FRAME_COUNT > 0 AND ALARMED_FRAME_MIN_TIMESTAMP is not NULL) THEN
 				where ff.timestamp > LAST_RUN_TIME
 			);
 	ELSE
-		UPDATE ALARM SET tally = tally + 1 WHERE alarm_id = ALARM_ID;
+		/*INSERT INTO sp_log(log_msg) values(concat("Debug: in ELSE => ALARM_ID: ", ALARM_ID, " TALLY_COUNT: ", TALLY_COUNT, "\n"));*/
+		UPDATE ALARM SET tally = TALLY_COUNT + 1 WHERE alarm_id = ALARM_ID;
+		
+		/*Inset alarm generated from frames*/
+		INSERT INTO GENERATED_FROM(video_id, frame_num, alarm_id)
+			SELECT f.video_id, f.frame_num, ALARM_ID
+			FROM frame f
+			where f.timestamp > LAST_RUN_TIME
+			AND (f.video_id, f.frame_num) NOT IN (
+				SELECT ff.video_id, ff.frame_num
+				FROM frame ff
+				JOIN 
+				CORRESPONDS_TO c ON (ff.video_id=c.video_id AND ff.frame_num = c.frame_num)
+				where ff.timestamp > LAST_RUN_TIME
+			);
 	END IF;
-	
+	/*INSERT INTO sp_log(log_msg) values(concat("Debug: Transaction END, updating ALARMED_FRAME_MAX_TIMESTAMP: ", ALARMED_FRAME_MAX_TIMESTAMP));*/
 	UPDATE SYSTEM_INFO s SET s.value = ALARMED_FRAME_MAX_TIMESTAMP WHERE s.key = 'ALARM_GENERATOR_LASTRUN';
-	
 COMMIT;
 	
 END IF;
@@ -307,7 +335,7 @@ END
 --- Unprocessed open alarm view
 ---
 CREATE VIEW `unprocessed_open_alarm` AS
-select 
+    select 
         `a`.`alarm_id` AS `alarm_id`,
         `a`.`cate_name` AS `cate_name`,
         `a`.`first_occ` AS `first_occ`,
@@ -316,16 +344,13 @@ select
         `a`.`clear_time` AS `clear_time`,
         `g`.`video_id` AS `video_id`,
         `v`.`video_path` AS `video_path`,
-        `g`.`frame_num` AS `frame_num`,
-        `s`.`user_id` AS `user_id`,
-        `s`.`status` AS `status`
+        `g`.`frame_num` AS `frame_num`
     from
-        ((`ALARM` `a`
-        left join `SENT_TO` `s` ON (((`s`.`alarm_id` = `a`.`alarm_id`)
-            and (`s`.`status` = 0))))
-        join (`GENERATED_FROM` `g`
-        join `VIDEO` `v` ON ((`v`.`video_id` = `g`.`video_id`))))
+        ((`alarm` `a`)
+        join (`generated_from` `g`
+        join `video` `v` ON ((`v`.`video_id` = `g`.`video_id`))))
     where
         ((`a`.`alarm_id` = `g`.`alarm_id`)
-            and isnull(`a`.`clear_time`))
-    order by `a`.`alarm_id`, `g`.`frame_num`
+            and isnull(`a`.`clear_time`)
+			and `a`.`alarm_id` NOT IN (SELECT `s`.`alarm_id` FROM `sent_to` `s`))
+    order by `a`.`alarm_id` , `g`.`frame_num`

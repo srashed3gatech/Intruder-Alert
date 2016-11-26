@@ -1,6 +1,8 @@
 import numpy as np
 import cv2, sys, os, time
+from PIL import Image
 import smtplib
+import threading
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.MIMEBase import MIMEBase
@@ -10,23 +12,69 @@ from classes.AlarmFrame import AlarmFrame
 from DBUtility import iAlertDB
 '''show video by given id and read corresponding frames associated to the alarm and show only the alarmed frames'''
 
-class AlertEmailer:
-    def __init__(self):
+class AlertEmailer(threading.Thread):
+    def __init__(self, threadID, name, exitThreadFlag, dbConn, sleepTime):
+        threading.Thread.__init__(self)
         self.logger = logging.getLogger(__name__)
-        
+        self.threadID = threadID
+        self.exitThreadFlag = exitThreadFlag
+        self.dbConn = dbConn
+        self.sleepTime = sleepTime
+    
+    def run(self):
+        while not self.exitThreadFlag:
+            self.logger.info("Alert Emailer working...")
+            try:
+                alarmFrameObjArr =  self.dbConn.get_unprocessed_alarm_frames()
+                for alarmFrameObj in alarmFrameObjArr:
+                    #2. generate temp video from frames and video file
+                    self.logger.info("Generating alarm video file")
+                    temp_video_file = self.createTempVideo(alarmFrameObj)
+                    
+                    #3. deliver the video file through email (email got from SYSTEM_USER table)
+                    alarmReceipients = self.dbConn.getAlarmReceipients()
+                    receipientEmails = "ialert6400@gmail.com" #send to myself
+                    for (userId, email) in alarmReceipients:
+                        receipientEmails += ", "+email
+                    self.logger.info("Sending email to %s" %receipientEmails)
+                    #4. update db indicating alarm processed
+                    if(self.emailIAlert(temp_video_file, receipientEmails) == True):
+                        self.dbConn.setAlarmProcessed(alarmReceipients, alarmFrameObj.alarmid)
+                    #5. delete temp video
+                    self.logger.info("Deleteing temp alarm video %s" %temp_video_file)
+                    os.remove(temp_video_file)
+            except Exception as e: 
+                self.logger.warning("Alert Emailer exception: %s" %e)
+            finally:
+                self.logger.info("Alert Emailer going to sleep...")
+                time.sleep(self.sleepTime)
+        self.logger.info("Alert Emailer Stopped!")
     # return new video file created out of all frames of alarm_frame_obj
     def createTempVideo(self, alarm_frame_obj):
-        output_temp_file = os.path.dirname(alarm_frame_obj.video_file)+"/tempalarm_%s_%s_" %(alarm_frame_obj.alarm_category, alarm_frame_obj.alarmid)+time.strftime("%Y%m%d-%H%M%S")+".avi"
-        fourcc = cv2.cv.CV_FOURCC(*'XVID')
-        out = cv2.VideoWriter(output_temp_file,fourcc, 20.0, (320,240))
+        if(os.path.isfile(alarm_frame_obj.video_file)):
+            print "%s - size: %s" %(alarm_frame_obj.video_file, os.path.getsize(alarm_frame_obj.video_file)) 
+        else:
+            raise IOError("File not found: %s" %alarm_frame_obj.video_file)
+        
         cap = cv2.VideoCapture(alarm_frame_obj.video_file)
+        if(not cap.isOpened()):
+            return -1;
+        
         cap.set(3 , 640) #width 320
         cap.set(4 , 480) #height 240
+        
+        output_temp_file = os.path.dirname(alarm_frame_obj.video_file)+"/tempalarm_%s_%s_" %(alarm_frame_obj.alarm_category, alarm_frame_obj.alarmid)+time.strftime("%Y%m%d-%H%M%S")+".avi"
+        fourcc = cv2.cv.CV_FOURCC(*'XVID')
+        out = cv2.VideoWriter(output_temp_file,fourcc, 20.0, (640,480))
+        
         for fameNum in alarm_frame_obj.frame_num:
-            cap.set(1, fameNum)
+            cap.set(1 , fameNum)
             ret, frame = cap.read()
+            #frame = imutils.resize(frame, width=400)
+            print "Width: %s, Height:%s" %(cap.get(3), cap.get(4))
             out.write(frame)
         cap.release()
+        out.release()
             
         return output_temp_file
     # email alarm video file to given email address, then delete the video file
@@ -65,7 +113,9 @@ class AlertEmailer:
         return True
     
 if __name__ == "__main__":
-    alertEmailerObj = AlertEmailer()
+    logging.basicConfig()
+    alertEmailerObj = AlertEmailer(1, "alert-emailer", False, iAlertDB(), 10)
+    #alertEmailerObj.start()
     while True:
         alertEmailerObj.logger.info("Alert Emailer working...")
         #1. read all not sent alarm from db along with their frames
@@ -81,7 +131,7 @@ if __name__ == "__main__":
             alarmReceipients = dbObj.getAlarmReceipients()
             receipientEmails = "ialert6400@gmail.com" #send to myself
             for (userId, email) in alarmReceipients:
-                receipientEmails += ","+email
+                receipientEmails += ", "+email
             alertEmailerObj.logger.info("Sending email to %s" %receipientEmails)
             #4. update db indicating alarm processed
             if(alertEmailerObj.emailIAlert(temp_video_file, receipientEmails) == True):
@@ -91,4 +141,5 @@ if __name__ == "__main__":
             os.remove(temp_video_file)
         alarmFrameObjArr.logger.info("Alert Emailer going to sleep...")
         time.sleep(30)
+    
     

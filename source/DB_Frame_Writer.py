@@ -24,12 +24,21 @@ class DBFrameWriter(threading.Thread):
     def run(self):
         self.logger.info("Starting DBFrameWriter...")
         while not self.exitThreadFlag:
-            vFrames = self._readQFrames()
-            if(len(vFrames) > 0):
-                self.logger.info("Writing Frames")
-                self._writeFrameToDB(vFrames)
-            self.logger.info("going to sleep for %s" %(self.polling_interval_sec))
-            time.sleep(self.polling_interval_sec)
+            try:
+                vFrames = self._readQFrames()
+                if(len(vFrames) > 0):
+                    self.logger.info("Writing Frames")
+                    self._writeFrameToDB(vFrames)
+                    self._callAlarmGenerationProc()
+                self.logger.info("going to sleep for %s" %(self.polling_interval_sec))
+                
+            except Exception as e:
+                self.logger.warning("DB Frame Writer exception: %s" %e)
+            
+            finally:
+                time.sleep(self.polling_interval_sec)
+            
+            
         self.logger.info("Exiting DBFrameWriter...")    
         
     def _readQFrames(self):
@@ -43,3 +52,6 @@ class DBFrameWriter(threading.Thread):
     def _writeFrameToDB(self, vFrames):
         self.db_instance.insert_frames(vFrames)
         self.logger.info("All frame written...")
+    
+    def _callAlarmGenerationProc(self):
+        self.db_instance.generate_alarm_process()

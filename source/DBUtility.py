@@ -156,6 +156,9 @@ class iAlertDB:
         insSendTo = sendToTable.insert()
         insSendTo.execute(sendToDictArr); 
     
+    def generate_alarm_process(self):
+        db = self._connect_db()
+        db.execute("CALL generate_alarm('IA',360)")
     
 #Test Cases: 
 if __name__ == "__main__":
@@ -166,5 +169,4 @@ if __name__ == "__main__":
     print(userList)'''
     '''videoFileObj = obj.get_video_file(101)
     print(videoFileObj)'''
-    obj.get_unprocessed_alarm_frames()
-
+    obj.generate_alarm_process();
