@@ -197,8 +197,8 @@ CREATE  OR REPLACE VIEW `recog_users` AS
 --- Alarm last occurrane column needed
 ---
 
-ALTER TABLE `ialertdb`.`ALARM` 
-ADD COLUMN `last_occ` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `first_occ`;
+ALTER TABLE ialertdb.ALARM 
+ADD COLUMN last_occ DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER first_occ;
 
 
 ---
@@ -334,23 +334,23 @@ END
 ---
 --- Unprocessed open alarm view
 ---
-CREATE VIEW `unprocessed_open_alarm` AS
+CREATE VIEW unprocessed_open_alarm AS
     select 
-        `a`.`alarm_id` AS `alarm_id`,
-        `a`.`cate_name` AS `cate_name`,
-        `a`.`first_occ` AS `first_occ`,
-        `a`.`last_occ` AS `last_occ`,
-        `a`.`tally` AS `tally`,
-        `a`.`clear_time` AS `clear_time`,
-        `g`.`video_id` AS `video_id`,
-        `v`.`video_path` AS `video_path`,
-        `g`.`frame_num` AS `frame_num`
+        a.alarm_id AS alarm_id,
+        a.cate_name AS cate_name,
+        a.first_occ AS first_occ,
+        a.last_occ AS last_occ,
+        a.tally AS tally,
+        a.clear_time AS clear_time,
+        g.video_id AS video_id,
+        v.video_path AS video_path,
+        g.frame_num AS frame_num
     from
-        ((`alarm` `a`)
-        join (`generated_from` `g`
-        join `video` `v` ON ((`v`.`video_id` = `g`.`video_id`))))
+        ((alarm a)
+        join (generated_from g
+        join video v ON ((v.video_id = g.video_id))))
     where
-        ((`a`.`alarm_id` = `g`.`alarm_id`)
-            and isnull(`a`.`clear_time`)
-			and `a`.`alarm_id` NOT IN (SELECT `s`.`alarm_id` FROM `sent_to` `s`))
-    order by `a`.`alarm_id` , `g`.`frame_num`
+        ((a.alarm_id = g.alarm_id)
+            and isnull(a.clear_time)
+			and a.alarm_id NOT IN (SELECT s.alarm_id FROM sent_to s))
+    order by a.alarm_id , g.frame_num

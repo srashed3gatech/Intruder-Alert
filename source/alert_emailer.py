@@ -71,7 +71,7 @@ class AlertEmailer(threading.Thread):
             cap.set(1 , fameNum)
             ret, frame = cap.read()
             #frame = imutils.resize(frame, width=400)
-            print "Width: %s, Height:%s" %(cap.get(3), cap.get(4))
+            #print "Width: %s, Height:%s" %(cap.get(3), cap.get(4))
             out.write(frame)
         cap.release()
         out.release()
