@@ -48,9 +48,9 @@ CREATE TABLE VIDEO (
 
 DROP TABLE IF EXISTS SYSTEM_INFO;
 CREATE TABLE SYSTEM_INFO (
-  'key' varchar(255) NOT NULL,
-  'value' varchar(255) NOT NULL,
-  PRIMARY KEY ('key')
+  `key` varchar(255) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -193,35 +193,35 @@ CREATE  OR REPLACE VIEW recog_users AS
 	JOIN RELATED_USER_PICTURE
 	USING (user_id);
 
----
---- Alarm last occurrane column needed
----
+--
+-- Alarm last occurrane column needed
+--
 
 ALTER TABLE ialertdb.ALARM 
 ADD COLUMN last_occ DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER first_occ;
 
 
----
---- Delete all data - flush
----
---- DELETE FROM CORRESPONDS_TO;
---- DELETE FROM GENERATED_FROM;
---- DELETE FROM SENT_TO;
---- DELETE FROM FRAME;
---- DELETE FROM VIDEO;
---- DELETE FROM ALARM;
+--
+-- Delete all data - flush
+--
+-- DELETE FROM CORRESPONDS_TO;
+-- DELETE FROM GENERATED_FROM;
+-- DELETE FROM SENT_TO;
+-- DELETE FROM FRAME;
+-- DELETE FROM VIDEO;
+-- DELETE FROM ALARM;
 
 
---- DELETE FROM RELATED_USER_PICTURE;
---- DELETE FROM RELATED_USER;
---- DELETE FROM SYSTEM_USER;
---- DELETE FROM USER;
---- DELETE FROM SYSTEM_INFO;
+-- DELETE FROM RELATED_USER_PICTURE;
+-- DELETE FROM RELATED_USER;
+-- DELETE FROM SYSTEM_USER;
+-- DELETE FROM USER;
+-- DELETE FROM SYSTEM_INFO;
 	
 
----
---- Alarm Gnerator - to be called from DB_Frame_Writer.run()
----
+--
+-- Alarm Gnerator - to be called from DB_Frame_Writer.run()
+--
 INSERT INTO SYSTEM_INFO VALUES('ALARM_GENERATOR_LASTRUN', current_timestamp());
 
 DELIMITER //
@@ -332,9 +332,9 @@ END IF;
 END
 //DELIMITER ;
 
----
---- Unprocessed open alarm view
----
+--
+-- Unprocessed open alarm view
+--
 CREATE VIEW unprocessed_open_alarm AS
     select 
         a.alarm_id AS alarm_id,
@@ -347,11 +347,11 @@ CREATE VIEW unprocessed_open_alarm AS
         v.video_path AS video_path,
         g.frame_num AS frame_num
     from
-        ((alarm a)
-        join (generated_from g
-        join video v ON ((v.video_id = g.video_id))))
+        ((ALARM a)
+        join (GENERATED_FROM g
+        join VIDEO v ON ((v.video_id = g.video_id))))
     where
         ((a.alarm_id = g.alarm_id)
             and isnull(a.clear_time)
-			and a.alarm_id NOT IN (SELECT s.alarm_id FROM sent_to s))
+			and a.alarm_id NOT IN (SELECT s.alarm_id FROM SENT_TO s))
     order by a.alarm_id , g.frame_num;
