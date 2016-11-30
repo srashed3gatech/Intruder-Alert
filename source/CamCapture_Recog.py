@@ -79,9 +79,7 @@ class CameraCaptureNRecognition:
             cv2.imshow('Video', frame)
         
             if len(faces)>0: ## save to the video file if faces are detected at this frame
-                out.write(frame)    ## write to video file
-                frm_cnt += 1
-                if intruder:
+            	if intruder:
 		            nbr_predicted  = -1
 		            conf = recog_faces[0]
                 else:
@@ -91,6 +89,8 @@ class CameraCaptureNRecognition:
                 vidFrame = VideoFrame(videoFileId, frm_cnt, 
 		                                  frameTime, nbr_predicted, conf)
                 self._write_to_queue(vidFrame)
+                out.write(frame)    ## write to video file
+                frm_cnt += 1
             
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
