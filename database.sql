@@ -260,11 +260,11 @@ END IF;
 /*1. Check if we need to insert alarm*/
 SELECT count(f.frame_num), min(f.timestamp), max(f.timestamp) 
 		INTO ALARMED_FRAME_COUNT, ALARMED_FRAME_MIN_TIMESTAMP, ALARMED_FRAME_MAX_TIMESTAMP
-	FROM frame f
+	FROM FRAME f
 	where f.timestamp > LAST_RUN_TIME
 	AND (f.video_id, f.frame_num) NOT IN (
 		SELECT ff.video_id, ff.frame_num
-		FROM frame ff
+		FROM FRAME ff
 		JOIN 
 		CORRESPONDS_TO c ON (ff.video_id=c.video_id AND ff.frame_num = c.frame_num)
 		where ff.timestamp > LAST_RUN_TIME
@@ -298,11 +298,11 @@ IF (ALARMED_FRAME_COUNT > 0 AND ALARMED_FRAME_MIN_TIMESTAMP is not NULL) THEN
 		/*Inset alarm generated from frames*/
 		INSERT INTO GENERATED_FROM(video_id, frame_num, alarm_id)
 			SELECT f.video_id, f.frame_num, last_alarm_id
-			FROM frame f
+			FROM FRAME f
 			where f.timestamp > LAST_RUN_TIME
 			AND (f.video_id, f.frame_num) NOT IN (
 				SELECT ff.video_id, ff.frame_num
-				FROM frame ff
+				FROM FRAME ff
 				JOIN 
 				CORRESPONDS_TO c ON (ff.video_id=c.video_id AND ff.frame_num = c.frame_num)
 				where ff.timestamp > LAST_RUN_TIME
@@ -314,11 +314,11 @@ IF (ALARMED_FRAME_COUNT > 0 AND ALARMED_FRAME_MIN_TIMESTAMP is not NULL) THEN
 		/*Inset alarm generated from frames*/
 		INSERT INTO GENERATED_FROM(video_id, frame_num, alarm_id)
 			SELECT f.video_id, f.frame_num, ALARM_ID
-			FROM frame f
+			FROM FRAME f
 			where f.timestamp > LAST_RUN_TIME
 			AND (f.video_id, f.frame_num) NOT IN (
 				SELECT ff.video_id, ff.frame_num
-				FROM frame ff
+				FROM FRAME ff
 				JOIN 
 				CORRESPONDS_TO c ON (ff.video_id=c.video_id AND ff.frame_num = c.frame_num)
 				where ff.timestamp > LAST_RUN_TIME
@@ -355,3 +355,51 @@ CREATE VIEW unprocessed_open_alarm AS
             and isnull(a.clear_time)
 			and a.alarm_id NOT IN (SELECT s.alarm_id FROM SENT_TO s))
     order by a.alarm_id , g.frame_num;
+    
+--
+-- populate one system user, 10 related users
+--
+
+SET FOREIGN_KEY_CHECKS = 0; 
+TRUNCATE ialertdb.USER;
+TRUNCATE ialertdb.RELATED_USER;
+TRUNCATE ialertdb.RELATED_USER_PICTURE;
+TRUNCATE ialertdb.SYSTEM_USER;
+SET FOREIGN_KEY_CHECKS = 1;
+
+INSERT INTO `ialertdb`.`USER` (`user_id`, `name`) VALUES ('1', 'Yaling');
+INSERT INTO `ialertdb`.`USER` (`user_id`, `name`) VALUES ('2', 'Mam');
+INSERT INTO `ialertdb`.`USER` (`user_id`, `name`) VALUES ('3', 'Kexin');
+INSERT INTO `ialertdb`.`USER` (`user_id`, `name`) VALUES ('4', 'Bob');
+INSERT INTO `ialertdb`.`USER` (`user_id`, `name`) VALUES ('5', 'Steve');
+INSERT INTO `ialertdb`.`USER` (`user_id`, `name`) VALUES ('6', 'Cindy');
+INSERT INTO `ialertdb`.`USER` (`user_id`, `name`) VALUES ('7', 'Sarah');
+INSERT INTO `ialertdb`.`USER` (`user_id`, `name`) VALUES ('8', 'Gina');
+INSERT INTO `ialertdb`.`USER` (`user_id`, `name`) VALUES ('9', 'Alier');
+INSERT INTO `ialertdb`.`USER` (`user_id`, `name`) VALUES ('10', 'Tom');
+
+INSERT INTO `ialertdb`.`SYSTEM_USER` (`user_id`, `email`, `password`) VALUES ('1', 'ialert6400@gmail.com', '1234567890;');
+
+INSERT INTO `ialertdb`.`RELATED_USER` (`user_id`, `conf_level_thresh`) VALUES ('1', '100');
+INSERT INTO `ialertdb`.`RELATED_USER` (`user_id`, `conf_level_thresh`) VALUES ('2', '100');
+INSERT INTO `ialertdb`.`RELATED_USER` (`user_id`, `conf_level_thresh`) VALUES ('3', '100');
+INSERT INTO `ialertdb`.`RELATED_USER` (`user_id`, `conf_level_thresh`) VALUES ('4', '100');
+INSERT INTO `ialertdb`.`RELATED_USER` (`user_id`, `conf_level_thresh`) VALUES ('5', '100');
+INSERT INTO `ialertdb`.`RELATED_USER` (`user_id`, `conf_level_thresh`) VALUES ('6', '100');
+INSERT INTO `ialertdb`.`RELATED_USER` (`user_id`, `conf_level_thresh`) VALUES ('7', '100');
+INSERT INTO `ialertdb`.`RELATED_USER` (`user_id`, `conf_level_thresh`) VALUES ('8', '100');
+INSERT INTO `ialertdb`.`RELATED_USER` (`user_id`, `conf_level_thresh`) VALUES ('9', '100');
+INSERT INTO `ialertdb`.`RELATED_USER` (`user_id`, `conf_level_thresh`) VALUES ('10', '100');
+
+INSERT INTO `ialertdb`.`RELATED_USER_PICTURE` (`user_id`, `pic_id`, `pic_path`) VALUES ('1', '1', '../detected_faces_imgs/user1');
+INSERT INTO `ialertdb`.`RELATED_USER_PICTURE` (`user_id`, `pic_id`, `pic_path`) VALUES ('2', '2', '../detected_faces_imgs/user2');
+INSERT INTO `ialertdb`.`RELATED_USER_PICTURE` (`user_id`, `pic_id`, `pic_path`) VALUES ('3', '3', '../detected_faces_imgs/user3');
+INSERT INTO `ialertdb`.`RELATED_USER_PICTURE` (`user_id`, `pic_id`, `pic_path`) VALUES ('4', '4', '../detected_faces_imgs/user4');
+INSERT INTO `ialertdb`.`RELATED_USER_PICTURE` (`user_id`, `pic_id`, `pic_path`) VALUES ('5', '5', '../detected_faces_imgs/user5');
+INSERT INTO `ialertdb`.`RELATED_USER_PICTURE` (`user_id`, `pic_id`, `pic_path`) VALUES ('6', '6', '../detected_faces_imgs/user6');
+INSERT INTO `ialertdb`.`RELATED_USER_PICTURE` (`user_id`, `pic_id`, `pic_path`) VALUES ('7', '7', '../detected_faces_imgs/user7');
+INSERT INTO `ialertdb`.`RELATED_USER_PICTURE` (`user_id`, `pic_id`, `pic_path`) VALUES ('8', '8', '../detected_faces_imgs/user8');
+INSERT INTO `ialertdb`.`RELATED_USER_PICTURE` (`user_id`, `pic_id`, `pic_path`) VALUES ('9', '9', '../detected_faces_imgs/user9');
+INSERT INTO `ialertdb`.`RELATED_USER_PICTURE` (`user_id`, `pic_id`, `pic_path`) VALUES ('10', '10', '../detected_faces_imgs/user10');
+
+
