@@ -4,6 +4,7 @@ from PIL import Image
 import logging
 import threading
 import Queue
+import copy
 '''This thread is responsible to:
         - write frame to frameRepoQ as it deletect faces from camera feed
         - write video file for recording purpose'''
@@ -49,6 +50,7 @@ class CameraCaptureNRecognition:
         while True:
             ## Capture frame-by-frame
             ret, frame = video_capture.read()
+            frame_org = copy.deepcopy(frame)
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = faceCascade.detectMultiScale(
                 gray,
@@ -89,7 +91,7 @@ class CameraCaptureNRecognition:
                 vidFrame = VideoFrame(videoFileId, frm_cnt, 
 		                                  frameTime, nbr_predicted, conf)
                 self._write_to_queue(vidFrame)
-                out.write(frame)    ## write to video file
+                out.write(frame_org)    ## write to video file
                 frm_cnt += 1
             
             if cv2.waitKey(1) & 0xFF == ord('q'):
