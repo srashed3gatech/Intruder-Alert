@@ -11,6 +11,8 @@ import logging
 class BootLoader():
     
     MODEL_PATH = "../face_recognizer.xml"
+    FACE_CASCPATH = "../haarcascades/haarcascade_frontalface_alt.xml"
+    FACECASCADE = cv2.CascadeClassifier(FACE_CASCPATH)
     
     def __init__(self, userListTrain):
         self.userList = userListTrain
@@ -34,6 +36,17 @@ class BootLoader():
             image = np.array(image_pil, 'uint8')
             ## Get the label of the image
             nbr = int(os.path.split(path)[1].split(".")[0].replace("user", ""))
+            
+            '''faces = self.FACECASCADE.detectMultiScale(image)
+                for (x, y, w, h) in faces:
+    #                 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                    images.append(image[y: y + h, x: x + w])
+                    labels.append(nbr)
+    #             images.append(image)
+    #             labels.append(nbr)
+                    cv2.imshow("Adding faces to traning set...", image[y: y + h, x: x + w])
+                    cv2.waitKey(50)'''
+            
             images.append(image)
             labels.append(nbr)
             cv2.imshow("Adding faces to traning set...", image)

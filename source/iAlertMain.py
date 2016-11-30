@@ -6,6 +6,7 @@ from DBUtility import iAlertDB
 from bootloader import BootLoader
 from CamCapture_Recog import CameraCaptureNRecognition
 from DB_Frame_Writer import DBFrameWriter
+from alert_emailer import AlertEmailer
 import logging
 ''' Main entry point for the program 
     1. load realated user using db utility
@@ -66,6 +67,15 @@ if __name__ == "__main__":
                  db)
     workerThreads.append(dbWriterThread)
     dbWriterThread.start()
+    
+    '''logger.info("Starting alert emailer ...")
+    alertEmailerThread = AlertEmailer(2, "alert-emailer", 
+                 stopDBWriterThreadFlag, db,
+                 10)
+    workerThreads.append(alertEmailerThread)
+    alertEmailerThread.start()'''
+    
+    
     camCapThread._image_recognize() #this doesn't work if its a thread
     #camCapThread.old_function()
     
@@ -73,6 +83,7 @@ if __name__ == "__main__":
         pass
     #camera capture closed, now signal for dbwriter close and close the program
     dbWriterThread.exitThreadFlag = True
+    '''alertEmailerThread.exitThreadFlag = True'''
     
     for t in workerThreads:
         t.join()
