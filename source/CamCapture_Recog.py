@@ -58,27 +58,38 @@ class CameraCaptureNRecognition:
             )
             
             frameTime = time.strftime('%Y-%m-%d %H:%M:%S')
+            recog_faces = []
+            intruder = True
+            recog = None
             ## Draw a rectangle around the faces
             for (x, y, w, h) in faces:
                 roi = gray[y:y+h,x:x+w] # a face region in current frame
                 nbr_predicted, conf = recognizer.predict(roi)
-                print "predicted: "+str(nbr_predicted)+" conf: "+str(conf)
-                vidFrame = VideoFrame(videoFileId, frm_cnt, 
-                                      frameTime, nbr_predicted, conf);
-                
-                self._write_to_queue(vidFrame)
+                recog_faces.append(conf)
                 if nbr_predicted>-1:
+                    intruder = False
+                    recog = {"pred":nbr_predicted,
+                            "conf":conf}
                     cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
                 else:
                     cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2)
                 #cv2.imshow("Recognizing Face", roi)
-            
             ## Display the resulting frame
             cv2.imshow('Video', frame)
         
             if len(faces)>0: ## save to the video file if faces are detected at this frame
                 out.write(frame)    ## write to video file
                 frm_cnt += 1
+                if intruder:
+		            nbr_predicted  = -1
+		            conf = recog_faces[0]
+                else:
+		            nbr_predicted = recog["pred"]
+		            conf = recog["conf"]
+                print "detected person in whole frame: "+str(nbr_predicted)+" conf: "+str(conf)
+                vidFrame = VideoFrame(videoFileId, frm_cnt, 
+		                                  frameTime, nbr_predicted, conf)
+                self._write_to_queue(vidFrame)
             
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
