@@ -68,12 +68,12 @@ if __name__ == "__main__":
     workerThreads.append(dbWriterThread)
     dbWriterThread.start()
     
-    '''logger.info("Starting alert emailer ...")
+    logger.info("Starting alert emailer ...")
     alertEmailerThread = AlertEmailer(2, "alert-emailer", 
                  stopDBWriterThreadFlag, db,
                  10)
     workerThreads.append(alertEmailerThread)
-    alertEmailerThread.start()'''
+    alertEmailerThread.start()
     
     
     camCapThread._image_recognize() #this doesn't work if its a thread
@@ -83,7 +83,7 @@ if __name__ == "__main__":
         pass
     #camera capture closed, now signal for dbwriter close and close the program
     dbWriterThread.exitThreadFlag = True
-    '''alertEmailerThread.exitThreadFlag = True'''
+    alertEmailerThread.exitThreadFlag = True
     
     for t in workerThreads:
         t.join()
