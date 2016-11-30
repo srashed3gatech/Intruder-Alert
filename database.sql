@@ -403,3 +403,21 @@ INSERT INTO `ialertdb`.`RELATED_USER_PICTURE` (`user_id`, `pic_id`, `pic_path`) 
 INSERT INTO `ialertdb`.`RELATED_USER_PICTURE` (`user_id`, `pic_id`, `pic_path`) VALUES ('10', '10', '../detected_faces_imgs/user10');
 
 
+--
+-- CLEAR program logs such as frames, videos, alarms etc
+-- 
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE ialertdb.ALARM;
+TRUNCATE ialertdb.CORRESPONDS_TO;
+TRUNCATE ialertdb.FRAME;
+TRUNCATE ialertdb.GENERATED_FROM;
+TRUNCATE ialertdb.VIDEO;
+TRUNCATE ialertdb.SENT_TO;
+SET FOREIGN_KEY_CHECKS = 1;
+
+SELECT * FROM ialertdb.ALARM;
+SELECT * FROM ialertdb.CORRESPONDS_TO;
+SELECT * FROM ialertdb.FRAME;
+SELECT * FROM ialertdb.GENERATED_FROM;
+SELECT * FROM ialertdb.VIDEO;
+SELECT * FROM ialertdb.SENT_TO;
