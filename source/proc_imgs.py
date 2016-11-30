@@ -80,28 +80,6 @@ def collect_img_from_cam():
     u.name = user_name
     db.insert_related_user(u)
 
-''' Training logic here, commented out so not retraining each time program runs '''
-def get_images_and_labels(path):
-    ## Append all the absolute image paths in a list image_paths
-    image_paths = [os.path.join(path, f) for f in os.listdir(path)]
-    ## face images
-    images = []
-    ## labels
-    labels = []
-    for image_path in image_paths:
-        ## Read the image and convert to grayscale
-        image_pil = Image.open(image_path).convert('L')
-        ## Convert the image format into numpy array
-        image = np.array(image_pil, 'uint8')
-        ## Get the label of the image
-        nbr = int(os.path.split(path)[1].split(".")[0].replace("user", ""))
-    	images.append(image)
-    	labels.append(nbr)
-    	cv2.imshow("Adding faces to traning set...", image)
-    	cv2.waitKey(50)
-    ## return the images list and labels list
-    return images, labels
-
 def process_images(path):
     img_cnt = 0
     image_paths = [os.path.join(path, f) for f in os.listdir(path)]
