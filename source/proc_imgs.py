@@ -7,7 +7,7 @@ from DBUtility import iAlertDB
 from classes.RelatedUserInfo import RelatedUserInfo
 
 ################################################################################
-#### Use this python script to update/train the model, use -h for more info on args
+#### Use this python script to collect or process user pics, use -h for more info on args
 ################################################################################
 #### set up casc paths and save-to dirs
 face_cascPath = "../haarcascades/haarcascade_frontalface_alt.xml"

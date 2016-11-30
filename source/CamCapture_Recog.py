@@ -9,7 +9,7 @@ import Queue
         - write video file for recording purpose'''
 
 class CameraCaptureNRecognition:
-    CONF_THRSH = 100
+    CONF_THRSH = 87
     def __init__(self, videoObj, frameQueue, qLock, 
                  face_cascade_path, model_path):
         self.videoObj = videoObj
@@ -30,9 +30,10 @@ class CameraCaptureNRecognition:
     def _image_recognize(self):
         self.logger.info("CWD: "+os.getcwd())
         faceCascade = cv2.CascadeClassifier(self.face_cascPath)
-        #### Set up the recognition model
-        ## For face recognition we will the the LBPH Face Recognizer
+        ''' Set up the recognition model
+         For face recognition we will the the LBPH Face Recognizer '''
         recognizer = cv2.createLBPHFaceRecognizer(1,8,8,8,self.CONF_THRSH)
+#        recognizer = cv2.createLBPHFaceRecognizer()
         self.logger.info("Openning Face cascade - "+self.model_path)
         recognizer.load(self.model_path)
                 
