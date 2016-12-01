@@ -46,7 +46,7 @@ class AlertEmailer(threading.Thread):
             finally:
                 self.logger.info("Alert Emailer going to sleep...")
                 time.sleep(self.sleepTime)
-                if not self.exitThreadFlag:
+                if self.exitThreadFlag:
                    break;
         self.logger.info("Alert Emailer Stopped!")
     # return new video file created out of all frames of alarm_frame_obj
