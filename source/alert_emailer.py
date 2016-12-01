@@ -22,7 +22,7 @@ class AlertEmailer(threading.Thread):
         self.sleepTime = sleepTime
     
     def run(self):
-        while not self.exitThreadFlag:
+        while True:
             self.logger.info("Alert Emailer working...")
             try:
                 alarmFrameObjArr =  self.dbConn.get_unprocessed_alarm_frames()
@@ -46,6 +46,8 @@ class AlertEmailer(threading.Thread):
             finally:
                 self.logger.info("Alert Emailer going to sleep...")
                 time.sleep(self.sleepTime)
+                if not self.exitThreadFlag:
+                   break;
         self.logger.info("Alert Emailer Stopped!")
     # return new video file created out of all frames of alarm_frame_obj
     def createTempVideo(self, alarm_frame_obj):
