@@ -63,14 +63,14 @@ if __name__ == "__main__":
     logger.info("Starting frame db writer ...")
     dbWriterThread = DBFrameWriter(threadID, "DB_Frame_Writer", 
                  frameExchangeQueue, qLock, 
-                 DB_FRAME_WRITE_TIMEOUT_SEC, stopDBWriterThreadFlag,
+                 DB_FRAME_WRITE_TIMEOUT_SEC, False,
                  db)
     workerThreads.append(dbWriterThread)
     dbWriterThread.start()
-    
+    threadID += 1
     logger.info("Starting alert emailer ...")
-    alertEmailerThread = AlertEmailer(2, "alert-emailer", 
-                 stopDBWriterThreadFlag, db,
+    alertEmailerThread = AlertEmailer(threadID, "alert-emailer", 
+                 False, db,
                  10)
     workerThreads.append(alertEmailerThread)
     alertEmailerThread.start()
