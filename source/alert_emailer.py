@@ -40,9 +40,7 @@ class AlertEmailer(threading.Thread):
                     #4. update db indicating alarm processed
                     if(self.emailIAlert(temp_video_file, receipientEmails) == True):
                         self.dbConn.setAlarmProcessed(alarmReceipients, alarmFrameObj.alarmid)
-                    #5. delete temp video
-                    self.logger.info("Deleteing temp alarm video %s" %temp_video_file)
-                    os.remove(temp_video_file)
+                    
             except Exception as e: 
                 self.logger.warning("Alert Emailer exception: %s" %e)
             finally:
@@ -86,7 +84,7 @@ class AlertEmailer(threading.Thread):
         self.logger.info("Going to send email...")
         fromaddr = "ialert6400@gmail.com"
         toaddr = emailAddress
-        
+        video_delete_flag= True
         msg = MIMEMultipart()
         
         msg['From'] = fromaddr
@@ -94,8 +92,6 @@ class AlertEmailer(threading.Thread):
         msg['Subject'] = "!!Intruder!!"
         
         body = "iAlert detected intruder on monitored premise... please check attached video for detail"
-        
-        msg.attach(MIMEText(body, 'plain'))
         
         if os.path.getsize(video_src_file) < 20000000 :
             filename = "alarmvideo.avi"
@@ -105,11 +101,13 @@ class AlertEmailer(threading.Thread):
             part.set_payload((attachment).read())
             encoders.encode_base64(part)
             part.add_header('Content-Disposition', 'attachment; filename= %s' %filename)
-        
+            
             msg.attach(part)
         else:
-            body = "iAlert detected intruder on monitored premise... \n but Alarm video discarded due to huge size... \n check it at server %s" %(os.path.abspath(video_src_file))
+            body = "iAlert detected intruder on monitored premise... \n but Alarm video discarded due to huge size (you can still check the file at server: %s)" %video_src_file
+            video_delete_flag = False
         
+        msg.attach(MIMEText(body, 'plain'))
         
         server = smtplib.SMTP('smtp.gmail.com',587)
         server.starttls()
@@ -118,36 +116,38 @@ class AlertEmailer(threading.Thread):
         server.sendmail(fromaddr, toaddr, text)
         server.quit()
         self.logger.info("Email sent")
+        
+        #5. delete temp video
+        if video_delete_flag: 
+            self.logger.info("Deleteing temp alarm video %s" %video_src_file)
+            os.remove(video_src_file)
         return True
     
 if __name__ == "__main__":
     logging.basicConfig()
     alertEmailerObj = AlertEmailer(1, "alert-emailer", False, iAlertDB(), 10)
     #alertEmailerObj.start()
-    while True:
-        alertEmailerObj.logger.info("Alert Emailer working...")
-        #1. read all not sent alarm from db along with their frames
-        dbObj = iAlertDB()
+    #while True:
+    alertEmailerObj.logger.info("Alert Emailer working...")
+    #1. read all not sent alarm from db along with their frames
+    dbObj = iAlertDB()
+    
+    alarmFrameObjArr =  dbObj.get_unprocessed_alarm_frames()
+    for alarmFrameObj in alarmFrameObjArr:
+        #2. generate temp video from frames and video file
+        alertEmailerObj.logger.info("Generating alarm video file")
+        temp_video_file = alertEmailerObj.createTempVideo(alarmFrameObj)
         
-        alarmFrameObjArr =  dbObj.get_unprocessed_alarm_frames()
-        for alarmFrameObj in alarmFrameObjArr:
-            #2. generate temp video from frames and video file
-            alertEmailerObj.logger.info("Generating alarm video file")
-            temp_video_file = alertEmailerObj.createTempVideo(alarmFrameObj)
-            
-            #3. deliver the video file through email (email got from SYSTEM_USER table)
-            alarmReceipients = dbObj.getAlarmReceipients()
-            receipientEmails = "ialert6400@gmail.com" #send to myself
-            for (userId, email) in alarmReceipients:
-                receipientEmails += ", "+email
-            alertEmailerObj.logger.info("Sending email to %s" %receipientEmails)
-            #4. update db indicating alarm processed
-            if(alertEmailerObj.emailIAlert(temp_video_file, receipientEmails) == True):
-                dbObj.setAlarmProcessed(alarmReceipients, alarmFrameObj.alarmid)
-            #5. delete temp video
-            alertEmailerObj.logger.info("Deleting temp alarm video %s" %temp_video_file)
-            os.remove(temp_video_file)
-        alertEmailerObj.logger.info("Alert Emailer going to sleep...")
-        time.sleep(30)
+        #3. deliver the video file through email (email got from SYSTEM_USER table)
+        alarmReceipients = dbObj.getAlarmReceipients()
+        receipientEmails = "ialert6400@gmail.com" #send to myself
+        for (userId, email) in alarmReceipients:
+            receipientEmails += ", "+email
+        alertEmailerObj.logger.info("Sending email to %s" %receipientEmails)
+        #4. update db indicating alarm processed
+        if(alertEmailerObj.emailIAlert(temp_video_file, receipientEmails) == True):
+            dbObj.setAlarmProcessed(alarmReceipients, alarmFrameObj.alarmid)
+    alertEmailerObj.logger.info("Alert Emailer going to sleep...")
+    time.sleep(30)
     
     
