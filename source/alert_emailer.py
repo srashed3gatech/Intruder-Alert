@@ -103,6 +103,7 @@ class AlertEmailer(threading.Thread):
             part.add_header('Content-Disposition', 'attachment; filename= %s' %filename)
             
             msg.attach(part)
+            attachment.close()
         else:
             body = "iAlert detected intruder on monitored premise... \n but Alarm video discarded due to huge size (you can still check the file at server: %s)" %video_src_file
             video_delete_flag = False

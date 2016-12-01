@@ -71,7 +71,7 @@ if __name__ == "__main__":
     logger.info("Starting alert emailer ...")
     alertEmailerThread = AlertEmailer(threadID, "alert-emailer", 
                  False, db,
-                 10)
+                 25)
     workerThreads.append(alertEmailerThread)
     alertEmailerThread.start()
     
