@@ -65,7 +65,7 @@ class AlertEmailer(threading.Thread):
         
         output_temp_file = os.path.dirname(alarm_frame_obj.video_file)+"/tempalarm_%s_%s_" %(alarm_frame_obj.alarm_category, alarm_frame_obj.alarmid)+time.strftime("%Y%m%d-%H%M%S")+".avi"
         fourcc = cv2.cv.CV_FOURCC(*'XVID')
-        out = cv2.VideoWriter(output_temp_file,-1, 20.0, (320, 240))
+        out = cv2.VideoWriter(output_temp_file,fourcc, 20.0, (640, 480))
         
         for fameNum in alarm_frame_obj.frame_num:
             cap.set(1 , fameNum)
@@ -108,7 +108,7 @@ class AlertEmailer(threading.Thread):
         
             msg.attach(part)
         else:
-            body += "\n Alarm vidoe discarded due to size... check it at server \nFile Location: %s" %os.path.abspath(video_src_file)
+            body = "iAlert detected intruder on monitored premise... \n but Alarm video discarded due to huge size... \n check it at server %s" %(os.path.abspath(video_src_file))
         
         
         server = smtplib.SMTP('smtp.gmail.com',587)
