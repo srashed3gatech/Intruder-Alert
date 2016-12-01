@@ -65,14 +65,18 @@ class AlertEmailer(threading.Thread):
         
         output_temp_file = os.path.dirname(alarm_frame_obj.video_file)+"/tempalarm_%s_%s_" %(alarm_frame_obj.alarm_category, alarm_frame_obj.alarmid)+time.strftime("%Y%m%d-%H%M%S")+".avi"
         fourcc = cv2.cv.CV_FOURCC(*'XVID')
-        out = cv2.VideoWriter(output_temp_file,fourcc, 20.0, (640,480))
+        out = cv2.VideoWriter(output_temp_file,-1, 20.0, (320, 240))
         
         for fameNum in alarm_frame_obj.frame_num:
             cap.set(1 , fameNum)
             ret, frame = cap.read()
             #frame = imutils.resize(frame, width=400)
             #print "Width: %s, Height:%s" %(cap.get(3), cap.get(4))
-            out.write(frame)
+            try:
+                out.write(frame)
+            except Exception as e:
+                self.logger.warning("Alert Emailer Create Video exception: %s" %e)
+                pass
         cap.release()
         out.release()
             
@@ -93,15 +97,19 @@ class AlertEmailer(threading.Thread):
         
         msg.attach(MIMEText(body, 'plain'))
         
-        filename = "alarmvideo.avi"
-        attachment = open(video_src_file, 'rb')
+        if os.path.getsize(video_src_file) < 20000000 :
+            filename = "alarmvideo.avi"
+            attachment = open(video_src_file, 'rb')
         
-        part = MIMEBase('application', 'octate-stream')
-        part.set_payload((attachment).read())
-        encoders.encode_base64(part)
-        part.add_header('Content-Disposition', 'attachment; filename= %s' %filename)
+            part = MIMEBase('application', 'octate-stream')
+            part.set_payload((attachment).read())
+            encoders.encode_base64(part)
+            part.add_header('Content-Disposition', 'attachment; filename= %s' %filename)
         
-        msg.attach(part)
+            msg.attach(part)
+        else:
+            body += "\n Alarm vidoe discarded due to size... check it at server \nFile Location: %s" %os.path.abspath(video_src_file)
+        
         
         server = smtplib.SMTP('smtp.gmail.com',587)
         server.starttls()
@@ -137,9 +145,9 @@ if __name__ == "__main__":
             if(alertEmailerObj.emailIAlert(temp_video_file, receipientEmails) == True):
                 dbObj.setAlarmProcessed(alarmReceipients, alarmFrameObj.alarmid)
             #5. delete temp video
-            alertEmailerObj.logger.info("Deleteing temp alarm video %s" %temp_video_file)
+            alertEmailerObj.logger.info("Deleting temp alarm video %s" %temp_video_file)
             os.remove(temp_video_file)
-        alarmFrameObjArr.logger.info("Alert Emailer going to sleep...")
+        alertEmailerObj.logger.info("Alert Emailer going to sleep...")
         time.sleep(30)
     
     
