@@ -44,10 +44,10 @@ class AlertEmailer(threading.Thread):
             except Exception as e: 
                 self.logger.warning("Alert Emailer exception: %s" %e)
             finally:
+                if self.exitThreadFlag:
+                   break
                 self.logger.info("Alert Emailer going to sleep...")
                 time.sleep(self.sleepTime)
-                if self.exitThreadFlag:
-                   break;
         self.logger.info("Alert Emailer Stopped!")
     # return new video file created out of all frames of alarm_frame_obj
     def createTempVideo(self, alarm_frame_obj):
